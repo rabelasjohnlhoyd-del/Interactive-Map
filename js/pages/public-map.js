@@ -6,7 +6,6 @@ let markersLayer = L.layerGroup();
 let allLocations = [];
 
 async function initMap() {
-
     map = L.map('map', { 
         zoomControl: false,
         maxZoom: 19 
@@ -17,8 +16,6 @@ async function initMap() {
     }).addTo(map);
 
     markersLayer.addTo(map);
-
-    // Zoom control in bottom right
     L.control.zoom({ position: 'bottomright' }).addTo(map);
 
     try {
@@ -46,30 +43,24 @@ function renderMarkers(category) {
     });
 }
 
-
 function handleLocationSelect(loc) {
     if (!loc) return;
 
-  
+    // I-offset ang view para hindi matakpan ng floating card
     const offsetLat = loc.lat - 0.0005; 
     map.flyTo([offsetLat, loc.lng], 18, {
         animate: true,
         duration: 1.5
     });
 
-    // 2. Update Floating Card Elements
     const card = document.getElementById('room-card');
-    const titleEl = document.getElementById('card-title');
-    const tagEl = document.getElementById('card-tag');
-    const descEl = document.getElementById('card-desc');
+    document.getElementById('card-title').innerText = loc.name;
+    document.getElementById('card-tag').innerText = loc.type || "Location";
+    document.getElementById('card-desc').innerText = loc.description || "No description available.";
+    
     const imgEl = document.getElementById('card-img');
     const imgSection = document.querySelector('.card-image-section');
 
-    titleEl.innerText = loc.name;
-    tagEl.innerText = loc.type || loc.category || "General";
-    descEl.innerText = loc.description || "No description available for this location.";
-    
-  
     if (loc.image && loc.image.trim() !== "") {
         imgEl.src = loc.image;
         imgSection.style.display = "block";
@@ -78,10 +69,8 @@ function handleLocationSelect(loc) {
         imgSection.style.display = "none"; 
     }
 
-    // 4. Show Card
     card.classList.add('active');
 
-    // 5. Setup Direction Button inside card
     const navBtn = document.getElementById('card-nav-btn');
     navBtn.onclick = () => {
         startNavigation(loc.lat, loc.lng, loc.name);
@@ -91,9 +80,7 @@ function handleLocationSelect(loc) {
 
 window.filterMarkers = function(category) {
     renderMarkers(category);
-  
     document.getElementById('room-card').classList.remove('active');
-    
     document.querySelectorAll('.f-pill').forEach(btn => {
         btn.classList.toggle('active', btn.getAttribute('onclick').includes(category));
     });
@@ -105,12 +92,15 @@ function startNavigation(lat, lng, name) {
     const targetText = document.getElementById('target-name');
     
     if (targetText) targetText.innerText = `Heading to ${name}`;
-    if (toast) toast.classList.remove('hidden');
+    if (toast) {
+        toast.classList.remove('hidden');
+        toast.style.display = 'flex'; 
+    }
 
     if (userMarker) {
         updateDirectionLine(userMarker.getLatLng(), destinationCoords);
     } else {
-        alert("Please enable GPS/Location to see directions.");
+        alert("Waiting for accurate GPS signal...");
     }
 }
 
@@ -129,13 +119,22 @@ function updateDirectionLine(userPos, destPos) {
     if (distElement) distElement.innerText = Math.round(dist);
 }
 
+// FIX: Mas accurate na Live Tracking
 function startLiveTracking() {
     if (!navigator.geolocation) return;
+
+    const options = {
+        enableHighAccuracy: true, 
+        timeout: 10000,
+        maximumAge: 0
+    };
+
     navigator.geolocation.watchPosition(pos => {
         const userPos = L.latLng(pos.coords.latitude, pos.coords.longitude);
+        
         if (!userMarker) {
             userMarker = L.circleMarker(userPos, { 
-                radius: 9, 
+                radius: 10, 
                 fillColor: '#2196F3', 
                 color: 'white', 
                 weight: 3, 
@@ -144,12 +143,9 @@ function startLiveTracking() {
         } else {
             userMarker.setLatLng(userPos);
         }
+        
         if (destinationCoords) updateDirectionLine(userPos, destinationCoords);
-    }, (err) => console.warn("GPS Error:", err), { 
-        enableHighAccuracy: true,
-        timeout: 5000,
-        maximumAge: 0
-    });
+    }, (err) => console.warn("GPS Error:", err), options);
 }
 
 function setupEventListeners() {
@@ -166,21 +162,22 @@ function setupEventListeners() {
         }
     });
 
-    // Reset View Button
     document.getElementById('btn-reset').addEventListener('click', () => {
         map.flyTo([14.2560, 121.4050], 17);
         if (polyline) map.removeLayer(polyline);
-        document.getElementById('distance-toast').classList.add('hidden');
+        const toast = document.getElementById('distance-toast');
+        toast.classList.add('hidden');
+        toast.style.display = 'none';
         document.getElementById('room-card').classList.remove('active');
         destinationCoords = null;
     });
 
-    // Locate Me Button
     document.getElementById('btn-locate').addEventListener('click', () => {
-        if (userMarker) {
-            map.flyTo(userMarker.getLatLng(), 18);
-        } else {
-            alert("Waiting for GPS signal...");
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(pos => {
+                const userPos = L.latLng(pos.coords.latitude, pos.coords.longitude);
+                map.flyTo(userPos, 18);
+            }, () => alert("Enable GPS to locate."), { enableHighAccuracy: true });
         }
     });
 }
