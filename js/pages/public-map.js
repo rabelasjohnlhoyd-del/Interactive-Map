@@ -46,7 +46,7 @@ function renderMarkers(category) {
 function handleLocationSelect(loc) {
     if (!loc) return;
 
-    // I-offset ang view para hindi matakpan ng floating card
+   
     const offsetLat = loc.lat - 0.0005; 
     map.flyTo([offsetLat, loc.lng], 18, {
         animate: true,
@@ -119,7 +119,7 @@ function updateDirectionLine(userPos, destPos) {
     if (distElement) distElement.innerText = Math.round(dist);
 }
 
-// FIX: Mas accurate na Live Tracking
+
 function startLiveTracking() {
     if (!navigator.geolocation) return;
 
