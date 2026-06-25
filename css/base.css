@@ -1,0 +1,216 @@
+/* ============================================
+   BASE.CSS — Laguna University Color System
+   ============================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@600;700&display=swap');
+
+:root {
+  /* Laguna University Brand Colors */
+  --lu-green:        #1A5C38;
+  --lu-green-dark:   #124026;
+  --lu-green-mid:    #236B43;
+  --lu-green-light:  #2E8B57;
+  --lu-gold:         #C8A84B;
+  --lu-gold-light:   #E0C06A;
+  --lu-gold-pale:    #F5EDD3;
+
+  /* Neutrals */
+  --white:           #FFFFFF;
+  --gray-50:         #F8F9FA;
+  --gray-100:        #F1F3F5;
+  --gray-200:        #E9ECEF;
+  --gray-300:        #DEE2E6;
+  --gray-400:        #CED4DA;
+  --gray-500:        #ADB5BD;
+  --gray-600:        #6C757D;
+  --gray-700:        #495057;
+  --gray-800:        #343A40;
+  --gray-900:        #212529;
+
+  /* Semantic */
+  --danger:          #DC3545;
+  --danger-light:    #F8D7DA;
+  --success:         #198754;
+  --warning:         #FFC107;
+  --info:            #0DCAF0;
+
+  /* Layout */
+  --sidebar-width:   260px;
+  --header-height:   60px;
+  --border-radius:   8px;
+  --border-radius-lg: 12px;
+  --shadow-sm:       0 1px 3px rgba(0,0,0,0.08);
+  --shadow-md:       0 4px 12px rgba(0,0,0,0.12);
+  --shadow-lg:       0 8px 24px rgba(0,0,0,0.16);
+  --transition:      0.2s ease;
+
+  /* Typography */
+  --font-body:       'Inter', sans-serif;
+  --font-display:    'Poppins', sans-serif;
+}
+
+/* === DARK MODE === */
+[data-theme="dark"] {
+  --white:           #1E1E2E;
+  --gray-50:         #252535;
+  --gray-100:        #2A2A3E;
+  --gray-200:        #333348;
+  --gray-300:        #3E3E55;
+  --gray-400:        #55556E;
+  --gray-500:        #7070A0;
+  --gray-600:        #9090B8;
+  --gray-700:        #B0B0CC;
+  --gray-800:        #D0D0E8;
+  --gray-900:        #F0F0FF;
+  --lu-gold-pale:    #2A2418;
+}
+
+/* === RESET & BASE === */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--gray-900);
+  background-color: var(--gray-50);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+button {
+  font-family: var(--font-body);
+  cursor: pointer;
+  border: none;
+  outline: none;
+}
+
+input, textarea, select {
+  font-family: var(--font-body);
+  font-size: 14px;
+}
+
+/* === BUTTONS === */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: var(--border-radius);
+  font-size: 14px;
+  font-weight: 500;
+  transition: all var(--transition);
+  white-space: nowrap;
+}
+
+.btn-primary {
+  background: var(--lu-green);
+  color: var(--white);
+}
+.btn-primary:hover { background: var(--lu-green-dark); }
+
+.btn-gold {
+  background: var(--lu-gold);
+  color: var(--lu-green-dark);
+}
+.btn-gold:hover { background: var(--lu-gold-light); }
+
+.btn-outline {
+  background: transparent;
+  border: 1.5px solid var(--gray-300);
+  color: var(--gray-700);
+}
+.btn-outline:hover { border-color: var(--lu-green); color: var(--lu-green); }
+
+.btn-danger {
+  background: var(--danger);
+  color: var(--white);
+}
+.btn-danger:hover { background: #b02a37; }
+
+.btn-sm {
+  padding: 5px 12px;
+  font-size: 13px;
+}
+
+.btn-lg {
+  padding: 11px 24px;
+  font-size: 15px;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* === FORM ELEMENTS === */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--gray-700);
+}
+
+.form-input {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1.5px solid var(--gray-300);
+  border-radius: var(--border-radius);
+  background: var(--white);
+  color: var(--gray-900);
+  transition: border-color var(--transition);
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--lu-green);
+  box-shadow: 0 0 0 3px rgba(26,92,56,0.1);
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+/* === BADGE === */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.badge-active   { background: #D1FAE5; color: #065F46; }
+.badge-inactive { background: var(--gray-200); color: var(--gray-600); }
+.badge-building { background: var(--lu-gold-pale); color: var(--lu-green-dark); }
+.badge-room     { background: #DBEAFE; color: #1E40AF; }
+.badge-archived { background: #FEE2E2; color: #991B1B; }
+
+/* === UTILITY === */
+.hidden { display: none !important; }
+.text-muted { color: var(--gray-500); }
+.text-danger { color: var(--danger); }
+.text-success { color: var(--success); }
+.flex { display: flex; }
+.flex-center { display: flex; align-items: center; justify-content: center; }
+.gap-2 { gap: 8px; }
+.gap-3 { gap: 12px; }
+.w-full { width: 100%; }

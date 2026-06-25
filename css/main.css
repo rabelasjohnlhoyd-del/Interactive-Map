@@ -1,0 +1,270 @@
+/* ============================================
+   MAIN.CSS — Master stylesheet
+   Imports all CSS modules in correct order
+   ============================================ */
+
+@import url('base.css');
+@import url('sidebar.css');
+@import url('header.css');
+@import url('building-card.css');
+@import url('modal.css');
+@import url('info-panel.css');
+
+/* ============================================
+   LAYOUT — Dashboard shell
+   ============================================ */
+
+.app-shell {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* Main content area (offset from sidebar) */
+.main-content {
+  margin-left: var(--sidebar-width);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Page wrapper (with header) */
+.page-wrapper {
+  margin-top: var(--header-height);
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
+}
+
+/* Map page — no padding, full fill */
+.map-page .page-wrapper {
+  padding: 0;
+  position: relative;
+}
+
+#map {
+  width: 100%;
+  height: calc(100vh - var(--header-height));
+}
+
+/* ============================================
+   PAGE HEADER — inside page-wrapper
+   ============================================ */
+
+.content-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.content-header-left { display: flex; flex-direction: column; gap: 4px; }
+
+.page-title {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--gray-900);
+}
+
+.page-subtitle {
+  font-size: 13px;
+  color: var(--gray-500);
+}
+
+/* ============================================
+   LOGIN PAGE
+   ============================================ */
+
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--lu-green-dark) 0%, var(--lu-green) 60%, var(--lu-gold) 100%);
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Decorative background circles */
+.login-page::before,
+.login-page::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.login-page::before {
+  width: 500px;
+  height: 500px;
+  background: rgba(255,255,255,0.04);
+  top: -150px;
+  right: -100px;
+}
+
+.login-page::after {
+  width: 300px;
+  height: 300px;
+  background: rgba(200,168,75,0.12);
+  bottom: -80px;
+  left: -60px;
+}
+
+.login-card {
+  background: var(--white);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 400px;
+  padding: 40px 36px;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.22);
+  position: relative;
+  z-index: 1;
+}
+
+.login-logo-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 28px;
+}
+
+.login-logo-circle {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: var(--lu-green);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 20px rgba(26,92,56,0.3);
+}
+
+.login-logo-circle img {
+  width: 52px;
+  height: 52px;
+  object-fit: contain;
+}
+
+.login-logo-circle-text {
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--white);
+}
+
+.login-school-name {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--lu-green-dark);
+  text-align: center;
+  line-height: 1.25;
+}
+
+.login-system-name {
+  font-size: 12px;
+  color: var(--gray-500);
+  text-align: center;
+  letter-spacing: 0.5px;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.login-divider {
+  height: 1px;
+  background: var(--gray-200);
+  margin: 4px 0;
+}
+
+.login-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: var(--danger-light);
+  border: 1px solid #F5C6CB;
+  border-radius: var(--border-radius);
+  font-size: 13px;
+  color: #842029;
+}
+
+.btn-login {
+  width: 100%;
+  padding: 12px;
+  background: var(--lu-green);
+  color: var(--white);
+  border-radius: var(--border-radius);
+  font-size: 15px;
+  font-weight: 600;
+  transition: all var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-login:hover { background: var(--lu-green-dark); }
+
+.btn-login.loading { opacity: 0.8; cursor: not-allowed; }
+
+.login-spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: var(--white);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 768px) {
+  :root {
+    --sidebar-width: 0px;
+  }
+
+  .sidebar {
+    transform: translateX(-260px);
+    width: 260px;
+    transition: transform 0.3s ease;
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+    width: 260px;
+  }
+
+  .main-content {
+    margin-left: 0;
+  }
+
+  .header {
+    left: 0;
+  }
+
+  .info-panel {
+    width: 100%;
+    right: -100%;
+  }
+
+  .info-panel.open {
+    right: 0;
+  }
+
+  .buildings-grid {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  }
+}

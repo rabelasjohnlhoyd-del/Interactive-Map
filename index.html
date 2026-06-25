@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login — LU Campus Map</title>
+  <link rel="stylesheet" href="css/main.css" />
+</head>
+<body>
+
+  <main class="login-page">
+
+    <div class="login-card">
+
+      <!-- Logo & School Name -->
+      <div class="login-logo-area">
+        <div class="login-logo-circle">
+          <!-- Replace with: <img src="assets/images/lu-logo.png" alt="LU Logo" /> -->
+          <span class="login-logo-circle-text">LU</span>
+        </div>
+        <div>
+          <div class="login-school-name">Laguna University</div>
+          <div class="login-system-name">Interactive Campus Map System</div>
+        </div>
+      </div>
+
+      <div class="login-divider"></div>
+
+      <!-- Login Form -->
+      <form class="login-form" id="loginForm" onsubmit="return false;">
+
+        <!-- Error message (hidden by default) -->
+        <div class="login-error hidden" id="loginError" role="alert">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          <span id="loginErrorMsg">Invalid email or password.</span>
+        </div>
+
+        <!-- Email -->
+        <div class="form-group">
+          <label class="form-label" for="emailInput">Email Address</label>
+          <input
+            class="form-input"
+            type="email"
+            id="emailInput"
+            name="email"
+            placeholder="you@laguna.edu.ph"
+            autocomplete="email"
+            required
+          />
+        </div>
+
+        <!-- Password -->
+        <div class="form-group">
+          <label class="form-label" for="passwordInput">Password</label>
+          <input
+            class="form-input"
+            type="password"
+            id="passwordInput"
+            name="password"
+            placeholder="Enter your password"
+            autocomplete="current-password"
+            required
+          />
+        </div>
+
+        <!-- Submit -->
+        <button
+          class="btn-login"
+          type="submit"
+          id="loginBtn"
+          onclick="handleLogin()"
+        >
+          <span id="loginBtnText">Sign In</span>
+        </button>
+
+      </form>
+
+    </div><!-- /.login-card -->
+
+  </main>
+
+  <script src="js/pages/login.js"></script>
+  <script src="js/main.js"></script>
+
+  <script>
+    /**
+     * handleLogin()
+     * Reads email and password, shows loading state,
+     * then calls loginUser(email, password) which is provided by the backend.
+     */
+    function handleLogin() {
+      const email    = document.getElementById('emailInput').value.trim();
+      const password = document.getElementById('passwordInput').value;
+      const btn      = document.getElementById('loginBtn');
+      const btnText  = document.getElementById('loginBtnText');
+      const errorBox = document.getElementById('loginError');
+      const errorMsg = document.getElementById('loginErrorMsg');
+
+      if (!email || !password) {
+        showLoginError('Please fill in all fields.');
+        return;
+      }
+
+      // Loading state
+      btn.disabled = true;
+      btn.classList.add('loading');
+      btnText.innerHTML = '<span class="login-spinner"></span> Signing in…';
+      errorBox.classList.add('hidden');
+
+      // ---- Backend hook ----
+      // loginUser(email, password) is defined by the backend developer.
+      // It should return a Promise that resolves on success or rejects with an error message.
+      if (typeof loginUser === 'function') {
+        loginUser(email, password)
+          .then(() => {
+            // Backend will handle redirect
+          })
+          .catch((err) => {
+            showLoginError(err?.message || 'Invalid email or password.');
+          })
+          .finally(() => {
+            btn.disabled = false;
+            btn.classList.remove('loading');
+            btnText.textContent = 'Sign In';
+          });
+      } else {
+        // Dev fallback — remove before production
+        console.warn('[DEV] loginUser() not defined. Backend not connected yet.');
+        setTimeout(() => {
+          btn.disabled = false;
+          btn.classList.remove('loading');
+          btnText.textContent = 'Sign In';
+          showLoginError('[Dev Mode] loginUser() is not yet connected.');
+        }, 1200);
+      }
+    }
+
+    function showLoginError(msg) {
+      const errorBox = document.getElementById('loginError');
+      const errorMsg = document.getElementById('loginErrorMsg');
+      errorMsg.textContent = msg;
+      errorBox.classList.remove('hidden');
+    }
+
+    // Allow Enter key to submit
+    document.getElementById('passwordInput').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') handleLogin();
+    });
+  </script>
+
+</body>
+</html>
