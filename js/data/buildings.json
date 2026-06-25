@@ -1,0 +1,194 @@
+[
+  { 
+    "name": "Oreta Building", 
+    "type": "office", 
+    "lat": 14.25564, "lng": 121.40778, 
+    "image": "assets/images/oreta.jpg",
+    "description": "The main administrative building of Laguna University, housing major department offices.",
+    "hours": "8:00 AM - 5:00 PM"
+  },
+  { 
+    "name": "Gate 1", 
+    "type": "gate", 
+    "lat": 14.25557, "lng": 121.40067, 
+    "image": "assets/images/gate1.jpg",
+    "description": "The primary entrance for students and vehicles entering the campus.",
+    "hours": "24/7 Open"
+  },
+  { 
+    "name": "Gate 2", 
+    "type": "gate", 
+    "lat": 14.25626, "lng": 121.40779, 
+    "image": "assets/images/gate2.jpg",
+    "description": "The secondary entrance and exit point located near the sports complex.",
+    "hours": "24/7 Open"
+  },
+  { 
+    "name": "Athlete's Village", 
+    "type": "office", 
+    "lat": 14.25490, "lng": 121.40754, 
+    "image": "assets/images/athlete.jpg",
+    "description": "Housing facility for Laguna University's student athletes.",
+    "hours": "Resident Access Only"
+  },
+  { 
+    "name": "Jose Rizal Monument", 
+    "type": "office", 
+    "lat": 14.255775, "lng": 121.40572, 
+    "image": "assets/images/rizal.jpg",
+    "description": "A landmark monument dedicated to the national hero, located at the center of the campus.",
+    "hours": "Open Area"
+  },
+  { 
+    "name": "LU 01 - LU 06", 
+    "type": "classroom", 
+    "lat": 14.25674, "lng": 121.40529, 
+    "image": "assets/images/lu01-06.jpg",
+    "description": "Main classroom block for General Education and basic college courses.",
+    "hours": "7:00 AM - 7:00 PM"
+  },
+  { 
+    "name": "CHS Laboratory / LU 07", 
+    "type": "lab", 
+    "lat": 14.25619, "lng": 121.40553, 
+    "image": "assets/images/chs_lab.jpg",
+    "description": "College of Health Sciences Laboratory for Nursing and Allied Health students.",
+    "hours": "8:00 AM - 5:00 PM"
+  },
+  { 
+    "name": "SHS Faculty / LU 09", 
+    "type": "office", 
+    "lat": 14.25625, "lng": 121.40565, 
+    "image": "assets/images/shs_faculty.jpg",
+    "description": "The central office for Senior High School faculty and coordinators.",
+    "hours": "8:00 AM - 5:00 PM"
+  },
+  { 
+    "name": "LU 10", 
+    "type": "classroom", 
+    "lat": 14.25634, "lng": 121.40560, 
+    "image": "assets/images/lu10.jpg",
+    "description": "General purpose classroom for various college departments.",
+    "hours": "7:00 AM - 6:00 PM"
+  },
+  { 
+    "name": "Records Office / LU 11", 
+    "type": "office", 
+    "lat": 14.25640, "lng": 121.40557, 
+    "image": "assets/images/records.jpg",
+    "description": "The office responsible for the maintenance of student permanent records and files.",
+    "hours": "8:00 AM - 5:00 PM"
+  },
+  { 
+    "name": "Registrar / LU 13-14", 
+    "type": "office", 
+    "lat": 14.25658, "lng": 121.40549, 
+    "image": "assets/images/registrar.jpg",
+    "description": "The office for enrollment, grades, transcripts, and other academic documentation.",
+    "hours": "8:00 AM - 5:00 PM"
+  },
+  { 
+    "name": "University Clinic / LU 16", 
+    "type": "office", 
+    "lat": 14.25675, "lng": 121.40542, 
+    "image": "assets/images/clinic.jpg",
+    "description": "Provides medical and first-aid services to students and faculty members.",
+    "hours": "8:00 AM - 5:00 PM"
+  },
+  { 
+    "name": "Research Center / LU 17", 
+    "type": "office", 
+    "lat": 14.25686, "lng": 121.40537, 
+    "image": "assets/images/research.jpg",
+    "description": "The hub for academic research and university publication services.",
+    "hours": "8:00 AM - 5:00 PM"
+  },
+  { 
+    "name": "HRMO / LU 18", 
+    "type": "office", 
+    "lat": 14.25692, "lng": 121.40534, 
+    "image": "assets/images/hrmo.jpg",
+    "description": "Human Resource Management Office for faculty and staff services.",
+    "hours": "8:00 AM - 5:00 PM"
+  },
+  { 
+    "name": "Cashier / LU 19", 
+    "type": "office", 
+    "lat": 14.25699, "lng": 121.40531, 
+    "image": "assets/images/cashier.jpg",
+    "description": "The central office for tuition payments and other financial transactions.",
+    "hours": "8:00 AM - 4:00 PM"
+  },
+  { 
+    "name": "Admin Office / LU 20", 
+    "type": "office", 
+    "lat": 14.25705, "lng": 121.40529, 
+    "image": "assets/images/admin_main.jpg",
+    "description": "Executive office of the university administration.",
+    "hours": "8:00 AM - 5:00 PM"
+  },
+  { 
+    "name": "San Luis Gym", 
+    "type": "gym", 
+    "lat": 14.25523, "lng": 121.40620, 
+    "image": "assets/images/san_luis_gym.jpg",
+    "description": "Major sports and events venue for university-wide gatherings.",
+    "hours": "Depends on Schedule"
+  },
+  { 
+    "name": "Multi-Purpose Gym", 
+    "type": "gym", 
+    "lat": 14.25467, "lng": 121.40630, 
+    "image": "assets/images/mp_gym.jpg",
+    "description": "Facility for basketball, volleyball, and physical education classes.",
+    "hours": "Depends on Schedule"
+  },
+  { 
+    "name": "Pool Area", 
+    "type": "gym", 
+    "lat": 14.25547, "lng": 121.40677, 
+    "image": "assets/images/pool.jpg",
+    "description": "Laguna Sports Complex swimming facility used for P.E. and swim competitions.",
+    "hours": "6:00 AM - 5:00 PM"
+  },
+  { 
+    "name": "New Building", 
+    "type": "classroom", 
+    "lat": 14.25426, "lng": 121.40904, 
+    "image": "assets/images/new_building.jpg",
+    "description": "The newest academic building with modern classroom facilities.",
+    "hours": "7:00 AM - 8:00 PM"
+  },
+  { 
+    "name": "Canteen", 
+    "type": "office", 
+    "lat": 14.25606, "lng": 121.40594, 
+    "image": "assets/images/canteen.jpg",
+    "description": "Main food court and student cafeteria area.",
+    "hours": "7:00 AM - 5:00 PM"
+  },
+  { 
+    "name": "M.E Offices", 
+    "type": "office", 
+    "lat": 14.25506, "lng": 121.40684, 
+    "image": "assets/images/me_building.jpg",
+    "description": "Offices for Mechanical Engineering faculty and coordinators.",
+    "hours": "8:00 AM - 5:00 PM"
+  },
+  { 
+    "name": "Science Labs (Chem/Bio/Phys)", 
+    "type": "lab", 
+    "lat": 14.25510, "lng": 121.40691, 
+    "image": "assets/images/science_labs.jpg",
+    "description": "State-of-the-art laboratories for Chemistry, Biology, and Physics experiments.",
+    "hours": "8:00 AM - 5:00 PM"
+  },
+  { 
+    "name": "Annex Building", 
+    "type": "office", 
+    "lat": 14.25654, "lng": 121.40542, 
+    "image": "assets/images/annex.jpg",
+    "description": "Additional administrative and academic support offices.",
+    "hours": "8:00 AM - 5:00 PM"
+  }
+]

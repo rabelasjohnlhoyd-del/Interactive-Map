@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LU Navigator | Public Map</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/main.css">
+
+  
+</head>
+<body class="map-view">
+
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+    <div class="app-shell">
+        <!-- SIDEBAR (Menu Only) -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="brand-group" style="display: flex; align-items: center; gap: 15px;">
+                    <div class="logo-box"><img src="assets/images/lu-logo.png" alt="LU Logo"></div>
+                    <div class="brand-text">
+                        <span class="main-name">LU NAVIGATOR</span>
+                        <span class="sub-name">CAMPUS MAP</span>
+                    </div>
+                </div>
+                <button class="close-sidebar" id="close-sidebar">✕</button>
+            </div>
+            <div class="info-content" style="padding: 20px;">
+                <p style="color: #ccc; font-size: 0.9rem;">Select a location on the map to see details here or on the floating card.</p>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <!-- FLOATING ROOM CARD -->
+            <div class="room-card" id="room-card">
+                <div class="card-image-section">
+                    <button class="close-card-btn" id="close-card">✕</button>
+                    <img id="card-img" src="assets/images/placeholder.jpg" alt="Room Photo">
+                </div>
+                <div class="card-details">
+                    <h2 id="card-title">Room Name</h2>
+                    <span id="card-tag" class="room-tag">Category</span>
+                    <p id="card-desc">Detailed information about this room or office will be displayed here.</p>
+                    <div class="card-actions">
+                        <button class="nav-btn" id="card-nav-btn">
+                            <span>🚶</span> Get Directions
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SEARCH AREA -->
+            <div class="floating-search-container">
+                <div class="search-card">
+                    <button class="burger-menu-btn" id="burger-btn">
+                        <span></span><span></span><span></span>
+                    </button>
+                    <input type="text" id="map-search" placeholder="Search room, office, lab...">
+                    <button class="search-btn">🔍</button>
+                </div>
+                <div class="filter-row">
+                    <button class="f-pill active" onclick="filterMarkers('all')">All</button>
+                    <button class="f-pill" onclick="filterMarkers('office')">Offices</button>
+                    <button class="f-pill" onclick="filterMarkers('lab')">Labs</button>
+                    <button class="f-pill" onclick="filterMarkers('canteen')">Canteen</button>
+                </div>
+            </div>
+
+            <div id="map"></div>
+
+            <!-- MAP ACTIONS -->
+            <div class="floating-actions">
+                <button class="map-fab" id="btn-locate">🎯</button>
+                <button class="map-fab" id="btn-reset">🏠</button>
+            </div>
+
+            <!-- DISTANCE TOAST -->
+            <div id="distance-toast" class="toast hidden" style="position: absolute; top: 100px; left: 50%; transform: translateX(-50%); z-index: 1000;">
+                <div class="toast-body">
+                    <span id="target-name">Navigating...</span>
+                    <div class="toast-distance"><span id="dist-value">0</span>m away</div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script type="module" src="js/pages/public-map.js"></script>
+
+    <script>
+        // Sidebar Toggles
+        const burgerBtn = document.getElementById('burger-btn');
+        const closeSidebar = document.getElementById('close-sidebar');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+
+        burgerBtn.addEventListener('click', () => {
+            sidebar.classList.add('active');
+            overlay.classList.add('active');
+        });
+
+        [closeSidebar, overlay].forEach(el => el.addEventListener('click', () => {
+            sidebar.classList.remove('active');
+            overlay.classList.remove('active');
+        }));
+
+        // Room Card Close
+        document.getElementById('close-card').addEventListener('click', () => {
+            document.getElementById('room-card').classList.remove('active');
+        });
+    </script>
+</body>
+</html>

@@ -36,15 +36,19 @@
   overflow-y: auto;
 }
 
-/* Map page — no padding, full fill */
+
 .map-page .page-wrapper {
   padding: 0;
   position: relative;
 }
 
 #map {
-  width: 100%;
-  height: calc(100vh - var(--header-height));
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0; 
+    z-index: 1;
 }
 
 /* ============================================
@@ -67,6 +71,13 @@
   font-size: 22px;
   font-weight: 700;
   color: var(--gray-900);
+}
+
+@media (max-width: 480px) {
+    .room-card {
+        max-height: 50vh; 
+        overflow-y: auto;
+    }
 }
 
 .page-subtitle {
@@ -268,3 +279,688 @@
     grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   }
 }
+
+
+/* ============================================
+   MAP PAGE SPECIFIC STYLES
+   ============================================ */
+
+.map-page .page-wrapper {
+    position: relative;
+    height: calc(100vh - var(--header-height));
+    overflow: hidden;
+}
+
+#map {
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    background: #f8f9fa;
+}
+
+/* --- Floating Map Overlays (Search & Filters) --- */
+.map-overlays {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    z-index: 1000;
+    width: 320px;
+    pointer-events: none;
+}
+
+.map-overlays > * { pointer-events: auto; }
+
+.search-wrapper {
+    background: var(--white);
+    display: flex;
+    align-items: center;
+    padding: 10px 16px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    margin-bottom: 12px;
+    border: 2px solid transparent;
+    transition: 0.3s;
+}
+
+.search-wrapper:focus-within {
+    border-color: var(--lu-gold);
+}
+
+.search-wrapper input {
+    border: none;
+    outline: none;
+    flex: 1;
+    font-size: 14px;
+    font-family: var(--font-main);
+    background: transparent;
+}
+
+.search-icon { opacity: 0.5; font-size: 14px; }
+
+/* Filter Pills */
+.filter-container {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    scrollbar-width: none;
+}
+
+.filter-container::-webkit-scrollbar { display: none; }
+
+.filter-pill {
+    background: var(--white);
+    border: 1px solid var(--gray-200);
+    padding: 8px 16px;
+    border-radius: 25px;
+    white-space: nowrap;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: 0.3s;
+    color: var(--gray-700);
+}
+
+.filter-pill:hover, .filter-pill.active {
+    background: var(--lu-green);
+    color: var(--white);
+    border-color: var(--lu-green);
+}
+
+/* --- Floating Action Buttons (Right Side) --- */
+.map-actions {
+    position: absolute;
+    bottom: 30px;
+    right: 20px;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.action-btn {
+    width: 48px;
+    height: 48px;
+    background: var(--white);
+    border: none;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    cursor: pointer;
+    font-size: 18px;
+    transition: all 0.2s ease;
+}
+
+.action-btn:hover {
+    background: var(--gray-100);
+    transform: scale(1.1);
+}
+
+/* --- Distance Toast (Bottom Center) --- */
+.toast {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    background: var(--lu-green-dark);
+    color: var(--white);
+    padding: 14px 28px;
+    border-radius: 50px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    border: 2px solid var(--lu-gold);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.toast.hidden { bottom: -100px; opacity: 0; }
+
+.toast-target {
+    display: block;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    opacity: 0.8;
+}
+
+.toast-distance {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+}
+
+.dist-val { font-weight: 800; font-size: 22px; color: var(--lu-gold); }
+.dist-unit { font-size: 12px; font-weight: 600; opacity: 0.9; }
+
+/* --- Sidebar Placeholder --- */
+.sidebar-placeholder {
+    padding: 60px 24px;
+    text-align: center;
+}
+
+.placeholder-icon {
+    font-size: 48px;
+    margin-bottom: 20px;
+    opacity: 0.3;
+}
+
+.sidebar-brand .brand-name {
+    font-size: 16px;
+    margin: 0;
+    color: var(--white);
+    letter-spacing: 1px;
+}
+
+.sidebar-brand .brand-sub {
+    color: var(--lu-gold);
+    font-weight: 600;
+    font-size: 10px;
+    display: block;
+}
+
+/* --- RESET & SMOOTHING --- */
+body.map-view {
+    margin: 0;
+    overflow: hidden;
+    font-family: 'Inter', sans-serif;
+}
+
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 320px;
+    height: 100vh;
+    background: #064e3b; /* LU Green */
+    color: white;
+    z-index: 2000;
+    transform: translateX(-100%); 
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
+    box-shadow: 10px 0 30px rgba(0,0,0,0.2);
+}
+
+.sidebar.active {
+    transform: translateX(0); 
+}
+
+.sidebar-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.3);
+    backdrop-filter: blur(2px);
+    z-index: 1999;
+    opacity: 0;
+    visibility: hidden;
+    transition: 0.3s ease;
+}
+
+.sidebar-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* --- FLOATING SEARCH BAR (MODERN) --- */
+.floating-search-container {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    width: 90%;
+    max-width: 450px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+.search-card {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    padding: 8px 15px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    border: 1px solid rgba(0,0,0,0.05);
+}
+
+.search-card input {
+    flex: 1;
+    border: none;
+    outline: none;
+    padding: 10px;
+    font-size: 15px;
+    background: transparent;
+}
+
+/* Burger Menu inside Search Card */
+.burger-menu-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 10px;
+}
+
+.burger-menu-btn span {
+    width: 20px;
+    height: 2px;
+    background: #333;
+    border-radius: 2px;
+}
+
+/* --- FILTER PILLS --- */
+.filter-row {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+    overflow-x: auto;
+    padding: 5px;
+    scrollbar-width: none;
+}
+
+.f-pill {
+    background: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 50px;
+    font-size: 13px;
+    font-weight: 500;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: 0.2s;
+}
+
+.f-pill.active {
+    background: #064e3b;
+    color: white;
+}
+
+/* --- FAB BUTTONS (Bottom Right) --- */
+.floating-actions {
+    position: absolute;
+    bottom: 25px;
+    right: 20px;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.map-fab {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: white;
+    border: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    cursor: pointer;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.2s;
+}
+
+.map-fab:hover { transform: scale(1.1); }
+
+/* --- SIDEBAR CONTENT UI --- */
+.sidebar-header {
+    padding: 25px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.logo-box img { width: 45px; }
+.brand-text .main-name { display: block; font-weight: 700; font-size: 1.2rem; }
+.brand-text .sub-name { font-size: 0.7rem; color: #fbbf24; font-weight: 600; }
+
+.close-sidebar {
+    background: rgba(255,255,255,0.1);
+    border: none;
+    color: white;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+#map {
+    height: 100vh;
+    width: 100vw;
+    z-index: 1;
+}
+
+
+ html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .app-shell {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+        }
+
+        
+        #map {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+     
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 350px;
+            height: 100%;
+            background: #064e3b;
+            color: white;
+            z-index: 2000; 
+            transform: translateX(-100%); 
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 10px 0 30px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar.active {
+            transform: translateX(0);
+        }
+
+      
+        .sidebar-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 1999;
+            opacity: 0;
+            visibility: hidden;
+            transition: 0.3s ease;
+            backdrop-filter: blur(2px);
+        }
+
+        .sidebar-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        
+        .floating-search-container {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            width: 90%;
+            max-width: 450px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .search-card {
+            background: white;
+            padding: 5px 15px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .search-card input {
+            flex: 1;
+            border: none;
+            outline: none;
+            padding: 12px;
+            font-size: 15px;
+            background: transparent;
+        }
+
+        
+        .burger-menu-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .burger-menu-btn span {
+            width: 20px;
+            height: 2px;
+            background: #444;
+            border-radius: 2px;
+        }
+
+        .search-btn {
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            color: #666;
+        }
+
+        /* 6. Filter Pills UI */
+        .filter-row {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+
+        .filter-row::-webkit-scrollbar { display: none; }
+
+        .f-pill {
+            background: white;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 50px;
+            font-size: 13px;
+            font-weight: 500;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: 0.2s;
+            white-space: nowrap;
+        }
+
+        .f-pill.active {
+            background: #064e3b;
+            color: white;
+        }
+
+        /* 7. Bottom Right FAB Buttons */
+        .floating-actions {
+            position: absolute;
+            bottom: 30px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .map-fab {
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            background: white;
+            border: none;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            cursor: pointer;
+            font-size: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+        }
+
+        .map-fab:hover { transform: scale(1.1); }
+
+        /* Sidebar Header Design */
+        .sidebar-header {
+            padding: 30px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0,0,0,0.1);
+        }
+
+        .logo-box img { width: 50px; height: auto; }
+        .brand-text .main-name { display: block; font-weight: 800; font-size: 1.3rem; letter-spacing: 1px; }
+        .brand-text .sub-name { font-size: 0.75rem; color: #fbbf24; font-weight: 600; }
+
+        .close-sidebar {
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        .info-content { padding: 25px; }
+
+        /* Mobile Adjustments */
+        @media (max-width: 480px) {
+            .sidebar { width: 100%; }
+            .floating-search-container { width: 95%; }
+        }
+
+
+
+        .room-card {
+            position: absolute;
+            bottom: -100%; 
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 400px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            z-index: 2000;
+            overflow: hidden;
+            transition: bottom 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .room-card.active {
+            bottom: 30px; /* Slide up position */
+        }
+
+        .card-image-section {
+            width: 100%;
+            height: 180px;
+            position: relative;
+            background: #eee;
+        }
+
+        .card-image-section img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .close-card-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.5);
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card-details {
+            padding: 20px;
+        }
+
+        .card-details h2 {
+            margin: 0;
+            font-size: 1.4rem;
+            color: #333;
+        }
+
+        .room-tag {
+            display: inline-block;
+            background: #f0fdf4;
+            color: #166534;
+            padding: 4px 12px;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            margin-top: 5px;
+            text-transform: uppercase;
+        }
+
+        .card-details p {
+            font-size: 0.9rem;
+            color: #666;
+            line-height: 1.5;
+            margin: 15px 0;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .nav-btn {
+            flex: 1;
+            background: #064e3b;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .nav-btn:hover { background: #053f30; }
+
+        /* Mobile specific adjustments */
+        @media (max-width: 480px) {
+            .room-card { width: 95%; bottom: -100%; }
+            .room-card.active { bottom: 20px; }
+        }
