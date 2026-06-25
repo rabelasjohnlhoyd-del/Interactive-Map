@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>All Buildings — LU Campus Map</title>
+  <link rel="stylesheet" href="../css/main.css" />
+</head>
+<body>
+
+  <div class="app-shell">
+
+    <!-- ======== SIDEBAR ======== -->
+    <aside class="sidebar" id="sidebar">
+
+      <!-- Brand -->
+      <div class="sidebar-brand">
+        <div class="sidebar-logo">
+          <!-- Replace with: <img src="../assets/images/lu-logo.png" alt="LU Logo" /> -->
+          <span>LU</span>
+        </div>
+        <div class="sidebar-brand-text">
+          <span class="sidebar-brand-name">Laguna University</span>
+          <span class="sidebar-brand-sub">Super Admin Panel</span>
+        </div>
+      </div>
+
+      <!-- Nav -->
+      <nav class="sidebar-nav" aria-label="Super Admin Navigation">
+        <span class="sidebar-nav-label">Navigation</span>
+
+        <a href="dashboard.html" class="sidebar-link">
+          <span class="nav-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="3 11 22 2 13 21 11 13 3 11"/>
+            </svg>
+          </span>
+          Map View
+        </a>
+
+        <a href="buildings.html" class="sidebar-link active" aria-current="page">
+          <span class="nav-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/>
+            </svg>
+          </span>
+          All Buildings
+        </a>
+
+        <a href="archives.html" class="sidebar-link">
+          <span class="nav-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/>
+            </svg>
+          </span>
+          Archives
+        </a>
+
+        <a href="manage-admins.html" class="sidebar-link">
+          <span class="nav-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+          </span>
+          Manage Admins
+        </a>
+      </nav>
+
+      <!-- Footer user + logout -->
+      <div class="sidebar-footer">
+        <div class="sidebar-footer-user">
+          <div class="sidebar-avatar" id="sidebarAvatarSA">SA</div>
+          <div class="sidebar-user-info">
+            <div class="sidebar-user-name" id="sidebarNameSA">Super Admin</div>
+            <div class="sidebar-user-role">Super Administrator</div>
+          </div>
+        </div>
+        <button class="btn-logout" onclick="logoutUser()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+          </svg>
+          Sign Out
+        </button>
+      </div>
+
+    </aside>
+    <!-- /.sidebar -->
+
+    <!-- ======== MAIN CONTENT ======== -->
+    <div class="main-content">
+
+      <!-- Header -->
+      <header class="header" id="header">
+        <div class="header-left">
+          <!-- Mobile hamburger -->
+          <button class="btn-theme-toggle" id="sidebarToggle" aria-label="Toggle sidebar" style="display:none;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+            </svg>
+          </button>
+          <div>
+            <div class="header-title">All Buildings</div>
+            <div class="header-breadcrumb">
+              <span>Super Admin</span>
+              <span class="sep">›</span>
+              <span class="current">All Buildings</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="header-right">
+          <!-- Dark mode toggle -->
+          <button class="btn-theme-toggle" id="themeToggle" aria-label="Toggle dark mode" title="Toggle dark mode">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="5"/>
+              <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+              <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+            </svg>
+          </button>
+
+          <!-- User chip -->
+          <div class="header-user">
+            <div class="header-avatar" id="headerAvatarSA">SA</div>
+            <div>
+              <div class="header-user-name" id="headerNameSA">Super Admin</div>
+              <div class="header-user-role">Super Administrator</div>
+            </div>
+          </div>
+        </div>
+      </header>
+      <!-- /.header -->
+
+      <!-- Page content -->
+      <div class="page-wrapper">
+
+        <!-- Page header row -->
+        <div class="content-header">
+          <div class="content-header-left">
+            <h1 class="page-title">All Buildings</h1>
+            <p class="page-subtitle" id="buildingsCountLabel">Loading buildings…</p>
+          </div>
+
+          <!-- Search bar -->
+          <div class="page-search-bar" role="search">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <input
+              type="search"
+              id="buildingSearchInput"
+              placeholder="Search buildings…"
+              aria-label="Search buildings"
+              autocomplete="off"
+            />
+          </div>
+        </div>
+
+        <!-- Buildings grid -->
+        <div class="buildings-grid" id="buildingsGrid">
+          <!-- Cards inserted by renderBuildingsList(buildings) -->
+        </div>
+
+        <!-- Empty state (hidden by default) -->
+        <div class="empty-state hidden" id="emptyState">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/>
+          </svg>
+          <h3 id="emptyStateTitle">No buildings found</h3>
+          <p id="emptyStateMsg">No buildings match your search. Try a different keyword.</p>
+        </div>
+
+      </div>
+      <!-- /.page-wrapper -->
+
+    </div>
+    <!-- /.main-content -->
+
+  </div>
+  <!-- /.app-shell -->
+
+  <!-- ======== ARCHIVE CONFIRM DIALOG ======== -->
+  <div class="modal-overlay confirm-dialog" id="archiveConfirmOverlay" role="dialog" aria-modal="true" aria-labelledby="archiveConfirmTitle">
+    <div class="modal modal-sm">
+      <div class="confirm-body">
+        <div class="confirm-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/>
+          </svg>
+        </div>
+        <h3 id="archiveConfirmTitle">Archive Building?</h3>
+        <p id="archiveConfirmMsg">This building will be moved to Archives. You can restore it later.</p>
+      </div>
+      <div class="modal-footer" style="justify-content: center; gap: 12px;">
+        <button class="btn btn-outline" onclick="closeArchiveConfirm()">Cancel</button>
+        <button class="btn btn-primary" id="archiveConfirmBtn">Archive</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/pages/superadmin-dashboard.js"></script>
+  <script src="../js/main.js"></script>
+
+  <script>
+    /* ===================================================
+       STATE
+    =================================================== */
+    let _allBuildings  = [];
+    let _pendingArchiveId = null;
+
+    /* ===================================================
+       setHeaderName(name)
+       Called by backend to set the super admin's name.
+    =================================================== */
+    function setHeaderName(name) {
+      const initials = name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+      document.getElementById('headerNameSA').textContent    = name;
+      document.getElementById('sidebarNameSA').textContent   = name;
+      document.getElementById('headerAvatarSA').textContent  = initials;
+      document.getElementById('sidebarAvatarSA').textContent = initials;
+    }
+
+    /* ===================================================
+       renderBuildingsList(buildings)
+       Called by backend with the full buildings array.
+       Each item: { id, name, type, photo?, addedBy? }
+    =================================================== */
+    function renderBuildingsList(buildings) {
+      _allBuildings = buildings || [];
+      _renderGrid(_allBuildings);
+
+      const label = document.getElementById('buildingsCountLabel');
+      label.textContent = `${_allBuildings.length} building${_allBuildings.length !== 1 ? 's' : ''} total`;
+    }
+
+    function _renderGrid(list) {
+      const grid       = document.getElementById('buildingsGrid');
+      const emptyState = document.getElementById('emptyState');
+      const emptyTitle = document.getElementById('emptyStateTitle');
+      const emptyMsg   = document.getElementById('emptyStateMsg');
+
+      grid.innerHTML = '';
+
+      if (!list || list.length === 0) {
+        const isFiltered = document.getElementById('buildingSearchInput').value.trim().length > 0;
+        emptyTitle.textContent = isFiltered ? 'No results found' : 'No buildings yet';
+        emptyMsg.textContent   = isFiltered
+          ? 'No buildings match your search. Try a different keyword.'
+          : 'Buildings added by admins will appear here.';
+        emptyState.classList.remove('hidden');
+        return;
+      }
+
+      emptyState.classList.add('hidden');
+
+      list.forEach(building => {
+        const card = _createBuildingCard(building);
+        grid.appendChild(card);
+      });
+    }
+
+    function _createBuildingCard(building) {
+      const card = document.createElement('div');
+      card.className = 'building-card';
+      card.dataset.id = building.id;
+
+      const isBuilding = (building.type || '').toLowerCase() !== 'room';
+      const badgeClass = isBuilding ? 'badge-building' : 'badge-room';
+      const badgeLabel = isBuilding ? 'Building' : 'Room';
+
+      card.innerHTML = `
+        ${building.photo
+          ? `<img src="${escapeHtml(building.photo)}" alt="${escapeHtml(building.name)}" class="building-card-img" loading="lazy" />`
+          : `<div class="building-card-img-placeholder">
+               <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                 <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/>
+               </svg>
+             </div>`
+        }
+        <div class="building-card-body">
+          <div class="building-card-header">
+            <span class="building-card-name">${escapeHtml(building.name || 'Unnamed Building')}</span>
+            <span class="badge ${badgeClass}">${badgeLabel}</span>
+          </div>
+          ${building.addedBy ? `
+          <div class="building-card-meta">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+            </svg>
+            <span>Added by ${escapeHtml(building.addedBy)}</span>
+          </div>` : ''}
+        </div>
+        <div class="building-card-footer">
+          <button
+            class="btn btn-outline btn-sm"
+            style="flex:1; justify-content:center; color: var(--danger); border-color: var(--danger);"
+            onclick="promptArchive('${escapeHtml(String(building.id))}', '${escapeHtml(building.name || 'this building')}')"
+            aria-label="Archive ${escapeHtml(building.name || 'building')}"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/>
+            </svg>
+            Archive
+          </button>
+        </div>`;
+
+      return card;
+    }
+
+    /* ===================================================
+       ARCHIVE FLOW
+    =================================================== */
+    function promptArchive(buildingId, buildingName) {
+      _pendingArchiveId = buildingId;
+      document.getElementById('archiveConfirmMsg').textContent =
+        `"${buildingName}" will be moved to Archives. You can restore it anytime.`;
+      document.getElementById('archiveConfirmOverlay').classList.add('open');
+    }
+
+    function closeArchiveConfirm() {
+      _pendingArchiveId = null;
+      document.getElementById('archiveConfirmOverlay').classList.remove('open');
+    }
+
+    document.getElementById('archiveConfirmBtn').addEventListener('click', () => {
+      if (!_pendingArchiveId) return;
+
+      const btn = document.getElementById('archiveConfirmBtn');
+      btn.disabled = true;
+      btn.textContent = 'Archiving…';
+
+      // ---- Backend hook ----
+      if (typeof archiveBuilding === 'function') {
+        archiveBuilding(_pendingArchiveId);
+      } else {
+        console.warn('[DEV] archiveBuilding() not yet connected.');
+        // Dev fallback: remove card from grid visually
+        const card = document.querySelector(`.building-card[data-id="${_pendingArchiveId}"]`);
+        if (card) card.remove();
+        _allBuildings = _allBuildings.filter(b => String(b.id) !== String(_pendingArchiveId));
+        const label = document.getElementById('buildingsCountLabel');
+        label.textContent = `${_allBuildings.length} building${_allBuildings.length !== 1 ? 's' : ''} total`;
+        if (_allBuildings.length === 0) _renderGrid([]);
+      }
+
+      btn.disabled = false;
+      btn.textContent = 'Archive';
+      closeArchiveConfirm();
+    });
+
+    // Close overlay on backdrop click
+    document.getElementById('archiveConfirmOverlay').addEventListener('click', function (e) {
+      if (e.target === this) closeArchiveConfirm();
+    });
+
+    /* ===================================================
+       SEARCH — real-time filter
+    =================================================== */
+    document.getElementById('buildingSearchInput').addEventListener('input', function () {
+      const query = this.value.trim().toLowerCase();
+      if (!query) {
+        _renderGrid(_allBuildings);
+        return;
+      }
+      const filtered = _allBuildings.filter(b =>
+        (b.name || '').toLowerCase().includes(query) ||
+        (b.type || '').toLowerCase().includes(query) ||
+        (b.addedBy || '').toLowerCase().includes(query)
+      );
+      _renderGrid(filtered);
+    });
+
+    /* ===================================================
+       logoutUser() — backend hook
+    =================================================== */
+    if (typeof logoutUser === 'undefined') {
+      window.logoutUser = function () {
+        console.warn('[DEV] logoutUser() not yet connected.');
+      };
+    }
+
+    /* ===================================================
+       DEV: load fake data from JSON if backend not ready
+    =================================================== */
+    (function devLoadFallback() {
+      // If renderBuildingsList is never called by the backend,
+      // show a placeholder empty state after a short delay.
+      setTimeout(() => {
+        if (_allBuildings.length === 0) {
+          const label = document.getElementById('buildingsCountLabel');
+          label.textContent = '0 buildings total';
+          _renderGrid([]);
+        }
+      }, 800);
+    })();
+
+    /* ===================================================
+       Dark mode toggle
+    =================================================== */
+    (function () {
+      const toggle = document.getElementById('themeToggle');
+      const root   = document.documentElement;
+      const saved  = localStorage.getItem('lu-theme');
+      if (saved === 'dark') root.setAttribute('data-theme', 'dark');
+      toggle.addEventListener('click', () => {
+        const isDark = root.getAttribute('data-theme') === 'dark';
+        root.setAttribute('data-theme', isDark ? 'light' : 'dark');
+        localStorage.setItem('lu-theme', isDark ? 'light' : 'dark');
+      });
+    })();
+
+    /* ===================================================
+       Mobile sidebar toggle
+    =================================================== */
+    (function () {
+      const toggleBtn = document.getElementById('sidebarToggle');
+      const sidebar   = document.getElementById('sidebar');
+      if (window.innerWidth <= 768) toggleBtn.style.display = 'flex';
+      toggleBtn.addEventListener('click', () => sidebar.classList.toggle('open'));
+      window.addEventListener('resize', () => {
+        toggleBtn.style.display = window.innerWidth <= 768 ? 'flex' : 'none';
+      });
+    })();
+
+    /* ===================================================
+       Escape HTML helper
+    =================================================== */
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+  </script>
+
+</body>
+</html>
