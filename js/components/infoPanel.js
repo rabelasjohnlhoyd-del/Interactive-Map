@@ -55,6 +55,7 @@ export function renderInfoPanel(data, onNavigate) {
     container.appendChild(card);
 }
 
+
 export function clearInfoPanel() {
     const container = document.getElementById('info-panel');
     container.innerHTML = `

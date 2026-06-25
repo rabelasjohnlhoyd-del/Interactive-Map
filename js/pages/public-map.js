@@ -120,6 +120,7 @@ function updateDirectionLine(userPos, destPos) {
 }
 
 
+
 function startLiveTracking() {
     if (!navigator.geolocation) return;
 
