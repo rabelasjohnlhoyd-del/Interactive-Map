@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Super Admin Dashboard — LU Campus Map</title>
+
+  <!-- Leaflet.js (provided per instructions) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <link rel="stylesheet" href="../css/main.css" />
+</head>
+<body class="app-shell map-page">
+
+  <!-- ========== SIDEBAR ========== -->
+  <aside class="sidebar" id="sidebar">
+
+    <div class="sidebar-brand">
+      <div class="sidebar-logo">LU</div>
+      <div class="sidebar-brand-text">
+        <span class="sidebar-brand-name">Laguna University</span>
+        <span class="sidebar-brand-sub">Campus Map</span>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <span class="sidebar-nav-label">Navigation</span>
+
+      <a href="dashboard.html" class="sidebar-link active">
+        <span class="nav-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="3 11 22 2 13 21 11 13 3 11"/>
+          </svg>
+        </span>
+        Map View
+      </a>
+
+      <a href="buildings.html" class="sidebar-link">
+        <span class="nav-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+          </svg>
+        </span>
+        All Buildings
+      </a>
+
+      <a href="archives.html" class="sidebar-link">
+        <span class="nav-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/>
+            <line x1="10" y1="12" x2="14" y2="12"/>
+          </svg>
+        </span>
+        Archives
+      </a>
+
+      <a href="manage-admins.html" class="sidebar-link">
+        <span class="nav-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
+        </span>
+        Manage Admins
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-footer-user">
+        <div class="sidebar-avatar" id="sidebarAvatar">S</div>
+        <div class="sidebar-user-info">
+          <div class="sidebar-user-name" id="sidebarUserName">Super Admin</div>
+          <div class="sidebar-user-role">Super Administrator</div>
+        </div>
+      </div>
+      <button class="btn-logout" onclick="logoutUser()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+          <polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
+        Logout
+      </button>
+    </div>
+
+  </aside><!-- /.sidebar -->
+
+
+  <!-- ========== MAIN CONTENT ========== -->
+  <div class="main-content">
+
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <div class="header-breadcrumb">
+          <span>Super Admin</span>
+          <span class="sep">›</span>
+          <span class="current">Map View</span>
+        </div>
+      </div>
+      <div class="header-right">
+        <button class="btn-theme-toggle" onclick="toggleTheme()" title="Toggle dark mode">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"/>
+            <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+          </svg>
+        </button>
+        <div class="header-user">
+          <div class="header-avatar" id="headerAvatar">S</div>
+          <div>
+            <div class="header-user-name" id="headerUserName">Super Admin</div>
+            <div class="header-user-role">Super Administrator</div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Map (view-only — no add marker button) -->
+    <div class="page-wrapper">
+      <div id="map"></div>
+    </div>
+
+  </div><!-- /.main-content -->
+
+
+  <!-- ========== INFO PANEL ========== -->
+  <div class="info-panel" id="infoPanel">
+
+    <div class="info-panel-header">
+      <span class="info-panel-title" id="infoPanelTitle">Building Name</span>
+      <button class="info-panel-close" onclick="closeInfoPanel()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="info-panel-cover-placeholder" id="infoPanelCoverPlaceholder">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+        <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/>
+        <polyline points="21 15 16 10 5 21"/>
+      </svg>
+    </div>
+    <img class="info-panel-cover hidden" id="infoPanelCover" src="" alt="" />
+
+    <div class="info-panel-body" id="infoPanelBody">
+      <!-- Content injected by openInfoPanel() -->
+    </div>
+
+  </div><!-- /.info-panel -->
+
+
+  <script src="../js/pages/superadmin-dashboard.js"></script>
+  <script src="../js/main.js"></script>
+
+  <script>
+    // ============================================================
+    // SUPER ADMIN DASHBOARD — Frontend Logic
+    // Backend hooks: logoutUser(), openInfoPanel(buildingData)
+    // setHeaderName(name) called by backend to set super admin name
+    // Map is VIEW-ONLY — no adding or editing markers
+    // ============================================================
+
+    // --- Header name (called by backend) ---
+    function setHeaderName(name) {
+      document.getElementById('headerUserName').textContent = name;
+      document.getElementById('sidebarUserName').textContent = name;
+      const initial = name.charAt(0).toUpperCase();
+      document.getElementById('headerAvatar').textContent = initial;
+      document.getElementById('sidebarAvatar').textContent = initial;
+    }
+
+    // --- Logout (backend hook) ---
+    function logoutUser() {
+      if (typeof logoutUser === 'function') return;
+      console.warn('[DEV] logoutUser() not connected.');
+    }
+
+    // --- Info panel ---
+    function openInfoPanel(buildingData) {
+      const panel = document.getElementById('infoPanel');
+      const title = document.getElementById('infoPanelTitle');
+      const body  = document.getElementById('infoPanelBody');
+      const cover = document.getElementById('infoPanelCover');
+      const placeholder = document.getElementById('infoPanelCoverPlaceholder');
+
+      title.textContent = buildingData.name || 'Unknown';
+
+      if (buildingData.photo) {
+        cover.src = buildingData.photo;
+        cover.classList.remove('hidden');
+        placeholder.classList.add('hidden');
+      } else {
+        cover.classList.add('hidden');
+        placeholder.classList.remove('hidden');
+      }
+
+      if (buildingData.type === 'room') {
+        body.innerHTML = `
+          <p class="info-panel-description">${buildingData.description || 'No description available.'}</p>
+        `;
+      } else {
+        const floors = buildingData.floors || [];
+        body.innerHTML = `
+          <p class="info-panel-description">${buildingData.description || ''}</p>
+          <div class="floors-accordion">
+            ${floors.map(floor => `
+              <div class="floor-item">
+                <div class="floor-item-header" onclick="toggleFloor(this)">
+                  <span class="floor-item-name">${floor.name}</span>
+                  <svg class="floor-item-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="6 9 12 15 18 9"/>
+                  </svg>
+                </div>
+                <div class="floor-item-content">
+                  ${floor.colleges ? `
+                    <div>
+                      <div class="floor-detail-label">Colleges / Departments</div>
+                      <div class="floor-detail-value">${floor.colleges}</div>
+                    </div>` : ''}
+                  ${floor.floorPhoto ? `<img class="floor-image" src="${floor.floorPhoto}" alt="Floor photo" />` : ''}
+                  ${floor.orgChart ? `
+                    <div>
+                      <div class="floor-detail-label">Org Chart</div>
+                      <img class="floor-image" src="${floor.orgChart}" alt="Org chart" />
+                    </div>` : ''}
+                  ${floor.faculty ? `
+                    <div>
+                      <div class="floor-detail-label">Faculty In-Charge</div>
+                      <div class="faculty-card">
+                        <div class="faculty-avatar">${floor.faculty.photo
+                          ? `<img src="${floor.faculty.photo}" alt="" style="width:100%;height:100%;border-radius:50%;object-fit:cover;" />`
+                          : floor.faculty.name.charAt(0)}</div>
+                        <div>
+                          <div class="faculty-name">${floor.faculty.name}</div>
+                          <div class="faculty-position">${floor.faculty.position || ''}</div>
+                        </div>
+                      </div>
+                    </div>` : ''}
+                  ${floor.rooms && floor.rooms.length ? `
+                    <div>
+                      <div class="floor-detail-label">Rooms</div>
+                      <div class="rooms-list-display">
+                        ${floor.rooms.map(r => `
+                          <div class="room-item-display ${r.isFaculty ? 'faculty-room' : ''}">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                              <rect x="3" y="3" width="18" height="18" rx="2"/>
+                            </svg>
+                            ${r.name}
+                            ${r.isFaculty ? '<span class="room-tag">Faculty</span>' : ''}
+                          </div>`).join('')}
+                      </div>
+                    </div>` : ''}
+                </div>
+              </div>`).join('')}
+          </div>
+        `;
+      }
+
+      panel.classList.add('open');
+    }
+
+    function closeInfoPanel() {
+      document.getElementById('infoPanel').classList.remove('open');
+    }
+
+    function toggleFloor(header) {
+      header.classList.toggle('expanded');
+      header.nextElementSibling.classList.toggle('open');
+    }
+
+    // --- Dark mode ---
+    function toggleTheme() {
+      const html = document.documentElement;
+      html.setAttribute('data-theme', html.getAttribute('data-theme') === 'dark' ? '' : 'dark');
+    }
+
+    // Expose to backend
+    window.openInfoPanel = openInfoPanel;
+    window.setHeaderName = setHeaderName;
+  </script>
+
+</body>
+</html>

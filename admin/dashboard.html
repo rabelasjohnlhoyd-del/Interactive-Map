@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard — LU Campus Map</title>
+
+  <!-- Leaflet.js (provided per instructions) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <link rel="stylesheet" href="../css/main.css" />
+</head>
+<body class="app-shell map-page">
+
+  <!-- ========== SIDEBAR ========== -->
+  <aside class="sidebar" id="sidebar">
+
+    <div class="sidebar-brand">
+      <div class="sidebar-logo">LU</div>
+      <div class="sidebar-brand-text">
+        <span class="sidebar-brand-name">Laguna University</span>
+        <span class="sidebar-brand-sub">Campus Map</span>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <span class="sidebar-nav-label">Navigation</span>
+
+      <a href="dashboard.html" class="sidebar-link active">
+        <span class="nav-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="3 11 22 2 13 21 11 13 3 11"/>
+          </svg>
+        </span>
+        Map View
+      </a>
+
+      <a href="buildings.html" class="sidebar-link">
+        <span class="nav-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+          </svg>
+        </span>
+        Buildings
+      </a>
+
+      <a href="#" class="sidebar-link">
+        <span class="nav-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+          </svg>
+        </span>
+        My Added
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-footer-user">
+        <div class="sidebar-avatar" id="sidebarAvatar">A</div>
+        <div class="sidebar-user-info">
+          <div class="sidebar-user-name" id="sidebarUserName">Admin</div>
+          <div class="sidebar-user-role">Administrator</div>
+        </div>
+      </div>
+      <button class="btn-logout" onclick="logoutUser()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+          <polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
+        Logout
+      </button>
+    </div>
+
+  </aside><!-- /.sidebar -->
+
+
+  <!-- ========== MAIN CONTENT ========== -->
+  <div class="main-content">
+
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <div class="map-instruction">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          Click on the map to add a marker
+        </div>
+      </div>
+      <div class="header-right">
+        <button class="btn-theme-toggle" onclick="toggleTheme()" title="Toggle dark mode">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"/>
+            <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+          </svg>
+        </button>
+        <div class="header-user">
+          <div class="header-avatar" id="headerAvatar">A</div>
+          <div>
+            <div class="header-user-name" id="headerUserName">Admin User</div>
+            <div class="header-user-role">Administrator</div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Map -->
+    <div class="page-wrapper">
+      <div id="map"></div>
+    </div>
+
+  </div><!-- /.main-content -->
+
+
+  <!-- ========== ADD/EDIT MARKER MODAL ========== -->
+  <div class="modal-overlay" id="markerModalOverlay">
+    <div class="modal modal-lg" id="markerModal">
+
+      <div class="modal-header">
+        <span class="modal-title" id="markerModalTitle">Add New Marker</span>
+        <button class="modal-close" onclick="closeMarkerModal()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="modal-body" id="markerModalBody">
+
+        <!-- Name -->
+        <div class="form-group">
+          <label class="form-label">Name</label>
+          <input class="form-input" type="text" id="markerName" placeholder="e.g. Admin Building" />
+        </div>
+
+        <!-- Type Toggle -->
+        <div class="form-group">
+          <label class="form-label">Type</label>
+          <div class="type-toggle">
+            <button class="type-toggle-btn active" id="typeBtnBuilding" onclick="setMarkerType('building')">Building</button>
+            <button class="type-toggle-btn" id="typeBtnRoom" onclick="setMarkerType('room')">Room</button>
+          </div>
+        </div>
+
+        <!-- Photo Upload -->
+        <div class="form-group">
+          <label class="form-label">Photo</label>
+          <div class="photo-upload-area" onclick="document.getElementById('markerPhoto').click()">
+            <input type="file" id="markerPhoto" accept="image/*" onchange="previewPhoto(this, 'markerPhotoPreview')" />
+            <div class="photo-upload-icon">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/>
+                <polyline points="21 15 16 10 5 21"/>
+              </svg>
+            </div>
+            <div class="photo-upload-text">Click to upload or <span>browse</span></div>
+            <div class="photo-preview" id="markerPhotoPreview">
+              <img id="markerPhotoPreviewImg" src="" alt="Preview" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div class="form-group">
+          <label class="form-label">Description</label>
+          <textarea class="form-input form-textarea" id="markerDescription" placeholder="Brief description..."></textarea>
+        </div>
+
+        <!-- ===== FLOOR SECTION (Building only) ===== -->
+        <div id="floorSection">
+          <div class="modal-section-label">Floors</div>
+          <div class="floors-section" id="floorsContainer">
+            <!-- Floor blocks injected by JS -->
+          </div>
+          <button class="btn btn-outline btn-sm" style="margin-top:10px;" onclick="addFloor()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            Add Floor
+          </button>
+        </div>
+
+      </div><!-- /.modal-body -->
+
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closeMarkerModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="submitMarker()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+            <polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/>
+          </svg>
+          Save Marker
+        </button>
+      </div>
+
+    </div>
+  </div><!-- /.modal-overlay -->
+
+
+  <!-- ========== INFO PANEL ========== -->
+  <div class="info-panel" id="infoPanel">
+
+    <div class="info-panel-header">
+      <span class="info-panel-title" id="infoPanelTitle">Building Name</span>
+      <button class="info-panel-close" onclick="closeInfoPanel()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="info-panel-cover-placeholder" id="infoPanelCoverPlaceholder">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+        <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/>
+        <polyline points="21 15 16 10 5 21"/>
+      </svg>
+    </div>
+    <img class="info-panel-cover hidden" id="infoPanelCover" src="" alt="" />
+
+    <div class="info-panel-body" id="infoPanelBody">
+      <!-- Content injected by openInfoPanel() -->
+    </div>
+
+  </div><!-- /.info-panel -->
+
+
+  <script src="../js/pages/admin-dashboard.js"></script>
+  <script src="../js/main.js"></script>
+
+  <script>
+    // ============================================================
+    // ADMIN DASHBOARD — Frontend Logic
+    // Backend hooks: loginUser(), logoutUser(), submitMarkerForm()
+    // openInfoPanel(buildingData) called by backend on marker click
+    // setHeaderName(name) called by backend to set admin name
+    // ============================================================
+
+    let currentMarkerType = 'building';
+    let floorCount = 0;
+
+    // --- Header name (called by backend) ---
+    function setHeaderName(name) {
+      document.getElementById('headerUserName').textContent = name;
+      document.getElementById('sidebarUserName').textContent = name;
+      const initial = name.charAt(0).toUpperCase();
+      document.getElementById('headerAvatar').textContent = initial;
+      document.getElementById('sidebarAvatar').textContent = initial;
+    }
+
+    // --- Logout (backend hook) ---
+    function logoutUser() {
+      if (typeof logoutUser === 'function') return;
+      console.warn('[DEV] logoutUser() not connected.');
+    }
+
+    // --- Marker type toggle ---
+    function setMarkerType(type) {
+      currentMarkerType = type;
+      document.getElementById('typeBtnBuilding').classList.toggle('active', type === 'building');
+      document.getElementById('typeBtnRoom').classList.toggle('active', type === 'room');
+      document.getElementById('floorSection').classList.toggle('hidden', type === 'room');
+    }
+
+    // --- Open modal ---
+    function openMarkerModal() {
+      document.getElementById('markerModalOverlay').classList.add('open');
+      setMarkerType('building');
+      floorCount = 0;
+      document.getElementById('floorsContainer').innerHTML = '';
+    }
+
+    // --- Close modal ---
+    function closeMarkerModal() {
+      document.getElementById('markerModalOverlay').classList.remove('open');
+    }
+
+    // --- Photo preview helper ---
+    function previewPhoto(input, previewId) {
+      const preview = document.getElementById(previewId);
+      const img = preview.querySelector('img');
+      if (input.files && input.files[0]) {
+        img.src = URL.createObjectURL(input.files[0]);
+        preview.style.display = 'block';
+      }
+    }
+
+    // --- Add floor block ---
+    function addFloor() {
+      floorCount++;
+      const id = floorCount;
+      const container = document.getElementById('floorsContainer');
+
+      const block = document.createElement('div');
+      block.className = 'floor-block';
+      block.id = `floorBlock${id}`;
+      block.innerHTML = `
+        <div class="floor-block-header">
+          <span class="floor-block-title">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="18" height="7" rx="1"/><rect x="3" y="14" width="18" height="7" rx="1"/>
+            </svg>
+            Floor ${id}
+          </span>
+          <button class="btn btn-sm" style="background:rgba(255,255,255,0.12);color:white;" onclick="removeFloor(${id})">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+            Remove
+          </button>
+        </div>
+        <div class="floor-block-body">
+
+          <div class="form-group">
+            <label class="form-label">Floor Name</label>
+            <input class="form-input" type="text" placeholder="e.g. Ground Floor" data-floor="${id}" data-field="name" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Colleges / Departments</label>
+            <input class="form-input" type="text" placeholder="e.g. College of Engineering" data-floor="${id}" data-field="colleges" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Floor Photo</label>
+            <div class="photo-upload-area" onclick="document.getElementById('floorPhoto${id}').click()">
+              <input type="file" id="floorPhoto${id}" accept="image/*" onchange="previewPhoto(this,'floorPhotoPreview${id}')" />
+              <div class="photo-upload-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/>
+                  <polyline points="21 15 16 10 5 21"/>
+                </svg>
+              </div>
+              <div class="photo-upload-text">Upload floor photo</div>
+              <div class="photo-preview" id="floorPhotoPreview${id}"><img src="" alt="" /></div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Org Chart Image</label>
+            <div class="photo-upload-area" onclick="document.getElementById('orgChart${id}').click()">
+              <input type="file" id="orgChart${id}" accept="image/*" onchange="previewPhoto(this,'orgChartPreview${id}')" />
+              <div class="photo-upload-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <rect x="9" y="9" width="6" height="6"/><path d="M3 9h6M15 9h6M3 15h6M15 15h6M9 3v6M15 3v6M9 15v6M15 15v6"/>
+                </svg>
+              </div>
+              <div class="photo-upload-text">Upload org chart</div>
+              <div class="photo-preview" id="orgChartPreview${id}"><img src="" alt="" /></div>
+            </div>
+          </div>
+
+          <!-- Faculty in-charge -->
+          <div class="modal-section-label">Faculty In-Charge</div>
+          <div class="form-group">
+            <label class="form-label">Name</label>
+            <input class="form-input" type="text" placeholder="Faculty name" data-floor="${id}" data-field="facultyName" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Position</label>
+            <input class="form-input" type="text" placeholder="e.g. Dean" data-floor="${id}" data-field="facultyPosition" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Faculty Photo</label>
+            <div class="photo-upload-area" onclick="document.getElementById('facultyPhoto${id}').click()">
+              <input type="file" id="facultyPhoto${id}" accept="image/*" onchange="previewPhoto(this,'facultyPhotoPreview${id}')" />
+              <div class="photo-upload-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                </svg>
+              </div>
+              <div class="photo-upload-text">Upload faculty photo</div>
+              <div class="photo-preview" id="facultyPhotoPreview${id}"><img src="" alt="" /></div>
+            </div>
+          </div>
+
+          <!-- Rooms -->
+          <div class="modal-section-label">Rooms</div>
+          <div class="rooms-list" id="roomsList${id}"></div>
+          <button class="btn btn-outline btn-sm" style="margin-top:6px;" onclick="addRoom(${id})">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            Add Room
+          </button>
+
+        </div>
+      `;
+      container.appendChild(block);
+    }
+
+    // --- Remove floor ---
+    function removeFloor(id) {
+      const block = document.getElementById(`floorBlock${id}`);
+      if (block) block.remove();
+    }
+
+    // --- Add room row ---
+    let roomCounters = {};
+    function addRoom(floorId) {
+      if (!roomCounters[floorId]) roomCounters[floorId] = 0;
+      roomCounters[floorId]++;
+      const rid = roomCounters[floorId];
+      const list = document.getElementById(`roomsList${floorId}`);
+
+      const row = document.createElement('div');
+      row.className = 'room-row';
+      row.id = `roomRow${floorId}_${rid}`;
+      row.innerHTML = `
+        <input class="form-input" type="text" placeholder="Room name" data-floor="${floorId}" data-room="${rid}" data-field="roomName" />
+        <input class="form-input" type="text" placeholder="Description" data-floor="${floorId}" data-room="${rid}" data-field="roomDesc" />
+        <label class="room-faculty-check">
+          <input type="checkbox" data-floor="${floorId}" data-room="${rid}" data-field="isFaculty" />
+          Faculty
+        </label>
+        <button class="btn-remove-room" onclick="removeRoom(${floorId}, ${rid})">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      `;
+      list.appendChild(row);
+    }
+
+    // --- Remove room ---
+    function removeRoom(floorId, rid) {
+      const row = document.getElementById(`roomRow${floorId}_${rid}`);
+      if (row) row.remove();
+    }
+
+    // --- Submit marker (backend hook) ---
+    function submitMarker() {
+      const formData = {
+        name: document.getElementById('markerName').value,
+        type: currentMarkerType,
+        description: document.getElementById('markerDescription').value,
+        floors: []
+      };
+
+      if (typeof submitMarkerForm === 'function') {
+        submitMarkerForm(formData);
+      } else {
+        console.warn('[DEV] submitMarkerForm() not connected.', formData);
+        closeMarkerModal();
+      }
+    }
+
+    // --- Info panel ---
+    function openInfoPanel(buildingData) {
+      const panel = document.getElementById('infoPanel');
+      const title = document.getElementById('infoPanelTitle');
+      const body  = document.getElementById('infoPanelBody');
+      const cover = document.getElementById('infoPanelCover');
+      const placeholder = document.getElementById('infoPanelCoverPlaceholder');
+
+      title.textContent = buildingData.name || 'Unknown';
+
+      if (buildingData.photo) {
+        cover.src = buildingData.photo;
+        cover.classList.remove('hidden');
+        placeholder.classList.add('hidden');
+      } else {
+        cover.classList.add('hidden');
+        placeholder.classList.remove('hidden');
+      }
+
+      if (buildingData.type === 'room') {
+        body.innerHTML = `
+          <p class="info-panel-description">${buildingData.description || 'No description available.'}</p>
+        `;
+      } else {
+        const floors = buildingData.floors || [];
+        body.innerHTML = `
+          <p class="info-panel-description">${buildingData.description || ''}</p>
+          <div class="floors-accordion">
+            ${floors.map((floor, i) => `
+              <div class="floor-item">
+                <div class="floor-item-header" onclick="toggleFloor(this)">
+                  <span class="floor-item-name">${floor.name}</span>
+                  <svg class="floor-item-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="6 9 12 15 18 9"/>
+                  </svg>
+                </div>
+                <div class="floor-item-content">
+                  ${floor.colleges ? `
+                    <div>
+                      <div class="floor-detail-label">Colleges / Departments</div>
+                      <div class="floor-detail-value">${floor.colleges}</div>
+                    </div>` : ''}
+                  ${floor.floorPhoto ? `<img class="floor-image" src="${floor.floorPhoto}" alt="Floor photo" />` : ''}
+                  ${floor.orgChart ? `
+                    <div>
+                      <div class="floor-detail-label">Org Chart</div>
+                      <img class="floor-image" src="${floor.orgChart}" alt="Org chart" />
+                    </div>` : ''}
+                  ${floor.faculty ? `
+                    <div>
+                      <div class="floor-detail-label">Faculty In-Charge</div>
+                      <div class="faculty-card">
+                        <div class="faculty-avatar">${floor.faculty.photo
+                          ? `<img src="${floor.faculty.photo}" alt="" style="width:100%;height:100%;border-radius:50%;object-fit:cover;" />`
+                          : floor.faculty.name.charAt(0)}</div>
+                        <div>
+                          <div class="faculty-name">${floor.faculty.name}</div>
+                          <div class="faculty-position">${floor.faculty.position || ''}</div>
+                        </div>
+                      </div>
+                    </div>` : ''}
+                  ${floor.rooms && floor.rooms.length ? `
+                    <div>
+                      <div class="floor-detail-label">Rooms</div>
+                      <div class="rooms-list-display">
+                        ${floor.rooms.map(r => `
+                          <div class="room-item-display ${r.isFaculty ? 'faculty-room' : ''}">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                              <rect x="3" y="3" width="18" height="18" rx="2"/>
+                            </svg>
+                            ${r.name}
+                            ${r.isFaculty ? '<span class="room-tag">Faculty</span>' : ''}
+                          </div>`).join('')}
+                      </div>
+                    </div>` : ''}
+                </div>
+              </div>`).join('')}
+          </div>
+        `;
+      }
+
+      panel.classList.add('open');
+    }
+
+    function closeInfoPanel() {
+      document.getElementById('infoPanel').classList.remove('open');
+    }
+
+    function toggleFloor(header) {
+      header.classList.toggle('expanded');
+      const content = header.nextElementSibling;
+      content.classList.toggle('open');
+    }
+
+    // --- Dark mode ---
+    function toggleTheme() {
+      const html = document.documentElement;
+      html.setAttribute('data-theme', html.getAttribute('data-theme') === 'dark' ? '' : 'dark');
+    }
+
+    // --- Map click to open modal (backend will initialize the map) ---
+    // The backend calls openMarkerModal() when a map click occurs.
+    // Exposing it globally so backend can call it directly.
+    window.openMarkerModal = openMarkerModal;
+    window.openInfoPanel   = openInfoPanel;
+    window.setHeaderName   = setHeaderName;
+  </script>
+
+</body>
+</html>
