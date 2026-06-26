@@ -276,6 +276,7 @@ function onGPSUpdate(pos) {
     const userPos  = L.latLng(pos.coords.latitude, pos.coords.longitude);
 
     gpsReady = true;
+    
 
     // Blue dot — always show regardless of accuracy
     if (!userMarker) {
