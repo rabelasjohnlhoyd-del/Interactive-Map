@@ -135,9 +135,10 @@
   </div>
 
   <script src="../js/main.js"></script>
+  <script src="../js/components/sidebar.js"></script>
+  <script src="../js/components/modal.js"></script>
   <script>
-    let _editingUid = null;
-
+    // Header name (called by backend)
     function setHeaderName(name) {
       document.getElementById('headerUserName').textContent  = name;
       document.getElementById('sidebarUserName').textContent = name;
@@ -146,14 +147,14 @@
       document.getElementById('sidebarAvatar').textContent = i;
     }
 
-    // Backend calls this
+    // Render admins list (called by backend)
     function renderAdminsList(admins) {
       const list  = document.getElementById('adminsList');
       const empty = document.getElementById('emptyState');
       const label = document.getElementById('adminsCountLabel');
       label.textContent = `${admins.length} admin account${admins.length !== 1 ? 's' : ''}`;
 
-      if (!admins.length) { list.innerHTML=''; empty.classList.remove('hidden'); return; }
+      if (!admins.length) { list.innerHTML = ''; empty.classList.remove('hidden'); return; }
       empty.classList.add('hidden');
 
       list.innerHTML = admins.map(a => {
@@ -183,48 +184,25 @@
       }).join('');
     }
 
-    function openAddAdminModal() {
-      _editingUid = null;
-      document.getElementById('adminModalTitle').textContent = 'Add Admin';
-      document.getElementById('adminName').value     = '';
-      document.getElementById('adminEmail').value    = '';
-      document.getElementById('adminPassword').value = '';
-      document.getElementById('adminRole').value     = 'admin';
-      document.getElementById('adminPasswordGroup').style.display = '';
-      document.getElementById('adminModalOverlay').classList.add('open');
-    }
-
-    function openEditAdminModal(admin) {
-      _editingUid = admin.uid;
-      document.getElementById('adminModalTitle').textContent = 'Edit Admin';
-      document.getElementById('adminName').value  = admin.name  || '';
-      document.getElementById('adminEmail').value = admin.email || '';
-      document.getElementById('adminRole').value  = admin.role  || 'admin';
-      document.getElementById('adminPasswordGroup').style.display = 'none'; // hidden on edit
-      document.getElementById('adminModalOverlay').classList.add('open');
-    }
-
-    function closeAdminModal() {
-      document.getElementById('adminModalOverlay').classList.remove('open');
-    }
+    // Modal handlers — use modal.js openAdminModal()
+    function openAddAdminModal()       { openAdminModal(null); }
+    function openEditAdminModal(admin) { openAdminModal(admin); }
 
     function saveAdmin() {
+      const uid = document.getElementById('adminModalUid').value || null;
       const formData = {
-        uid:      _editingUid,
+        uid,
         name:     document.getElementById('adminName').value.trim(),
         email:    document.getElementById('adminEmail').value.trim(),
-        password: _editingUid ? undefined : document.getElementById('adminPassword').value,
+        password: uid ? undefined : document.getElementById('adminPassword').value,
         role:     document.getElementById('adminRole').value,
       };
       if (!formData.name || !formData.email) {
         alert('Name and email are required.');
         return;
       }
-      if (typeof submitAdminForm === 'function') {
-        submitAdminForm(formData);
-      } else {
-        console.warn('[DEV] submitAdminForm() not connected.', formData);
-      }
+      if (typeof submitAdminForm === 'function') submitAdminForm(formData);
+      else console.warn('[DEV] submitAdminForm() not connected.', formData);
       closeAdminModal();
     }
 
@@ -233,12 +211,13 @@
       else console.warn('[DEV] toggleAdminStatus() not connected.', uid, currentStatus);
     }
 
-    if (typeof logoutUser === 'undefined') window.logoutUser = () => console.warn('[DEV] logoutUser() not connected.');
+    if (typeof logoutUser === 'undefined')
+      window.logoutUser = () => console.warn('[DEV] logoutUser() not connected.');
 
     window.setHeaderName    = setHeaderName;
     window.renderAdminsList = renderAdminsList;
+    window.saveAdmin        = saveAdmin;
 
-    // Dev fallback
     setTimeout(() => {
       if (!document.querySelector('#adminsList > div')) renderAdminsList([]);
     }, 800);

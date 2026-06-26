@@ -110,9 +110,11 @@
   </div>
 
   <script src="../js/main.js"></script>
+  <script src="../js/components/sidebar.js"></script>
+  <script src="../js/components/buildingCard.js"></script>
+  <script src="../js/components/modal.js"></script>
   <script>
-    let _pendingDeleteId = null;
-
+    // Header name (called by backend)
     function setHeaderName(name) {
       document.getElementById('headerUserName').textContent  = name;
       document.getElementById('sidebarUserName').textContent = name;
@@ -121,74 +123,33 @@
       document.getElementById('sidebarAvatar').textContent = i;
     }
 
-    // Backend calls this
+    // Render archived buildings (called by backend)
     function renderArchivesList(buildings) {
-      const grid  = document.getElementById('archivesGrid');
-      const empty = document.getElementById('emptyState');
       const label = document.getElementById('archivesCountLabel');
       label.textContent = `${buildings.length} archived building${buildings.length !== 1 ? 's' : ''}`;
-
-      if (!buildings.length) { grid.innerHTML=''; empty.classList.remove('hidden'); return; }
-      empty.classList.add('hidden');
-
-      grid.innerHTML = buildings.map(b => `
-        <div class="building-card archived" data-id="${b.id}">
-          ${b.photo
-            ? `<img class="building-card-img" src="${b.photo}" alt="${b.name}" />`
-            : `<div class="building-card-img-placeholder"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></div>`}
-          <div class="building-card-body">
-            <div class="building-card-header">
-              <span class="building-card-name">${b.name}</span>
-              <span class="badge badge-archived">Archived</span>
-            </div>
-            <div class="building-card-meta">
-              ${b.archivedAt ? `Archived ${b.archivedAt}` : ''}
-              ${b.archivedBy ? ` by ${b.archivedBy}` : ''}
-            </div>
-          </div>
-          <div class="building-card-footer" style="gap:6px;">
-            <button class="btn btn-outline btn-sm" style="flex:1;justify-content:center;" onclick="doRestore('${b.id}')">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/></svg>
-              Restore
-            </button>
-            <button class="btn btn-danger btn-sm" style="flex:1;justify-content:center;" onclick="promptDelete('${b.id}','${b.name}')">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
-              Delete
-            </button>
-          </div>
-        </div>`).join('');
+      renderBuildingCards(buildings, 'archivesGrid', 'archives');
     }
 
-    function doRestore(id) {
-      if (typeof restoreBuilding === 'function') restoreBuilding(id);
-      else console.warn('[DEV] restoreBuilding() not connected. ID:', id);
-    }
-
-    function promptDelete(id, name) {
-      _pendingDeleteId = id;
+    // Delete confirm — uses modal.js openModal()
+    window.promptDelete = function(id, name) {
       document.getElementById('deleteConfirmMsg').textContent =
         `"${name}" will be permanently deleted. This cannot be undone.`;
-      document.getElementById('deleteConfirmOverlay').classList.add('open');
-    }
+      document.getElementById('deleteConfirmBtn').onclick = () => {
+        if (typeof permanentlyDeleteBuilding === 'function') permanentlyDeleteBuilding(id);
+        else console.warn('[DEV] permanentlyDeleteBuilding() not connected. ID:', id);
+        closeModal('deleteConfirmOverlay');
+      };
+      openModal('deleteConfirmOverlay');
+    };
 
-    function closeDeleteConfirm() {
-      _pendingDeleteId = null;
-      document.getElementById('deleteConfirmOverlay').classList.remove('open');
-    }
+    window.closeDeleteConfirm = () => closeModal('deleteConfirmOverlay');
 
-    document.getElementById('deleteConfirmBtn').addEventListener('click', () => {
-      if (!_pendingDeleteId) return;
-      if (typeof permanentlyDeleteBuilding === 'function') permanentlyDeleteBuilding(_pendingDeleteId);
-      else console.warn('[DEV] permanentlyDeleteBuilding() not connected. ID:', _pendingDeleteId);
-      closeDeleteConfirm();
-    });
+    if (typeof logoutUser === 'undefined')
+      window.logoutUser = () => console.warn('[DEV] logoutUser() not connected.');
 
-    if (typeof logoutUser === 'undefined') window.logoutUser = () => console.warn('[DEV] logoutUser() not connected.');
-
-    window.setHeaderName     = setHeaderName;
+    window.setHeaderName      = setHeaderName;
     window.renderArchivesList = renderArchivesList;
 
-    // Dev: load empty after 800ms if backend never calls renderArchivesList
     setTimeout(() => {
       if (!document.querySelector('.building-card')) renderArchivesList([]);
     }, 800);
