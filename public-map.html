@@ -4,45 +4,105 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LU Navigator | Public Map</title>
+    
+    <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+   
     <link rel="stylesheet" href="css/main.css">
-  
-
 </head>
 <body class="map-view">
 
+   
     <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
     <div class="app-shell">
-        <!-- SIDEBAR (Menu Only) -->
+        
+        <!-- SIDEBAR (CAMPUS COMPANION) -->
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
-                <div class="brand-group" style="display: flex; align-items: center; gap: 15px;">
-                    <div class="logo-box"><img src="assets/images/lu-logo.png" alt="LU Logo"></div>
+                <div class="brand-group">
+                    <div class="logo-box">
+                        <img src="assets/images/lu-logo.png" alt="LU Logo">
+                    </div>
                     <div class="brand-text">
                         <span class="main-name">LU NAVIGATOR</span>
-                        <span class="sub-name">CAMPUS MAP</span>
+                        <span class="sub-name">CAMPUS COMPANION</span>
                     </div>
                 </div>
-                <button class="close-sidebar" id="close-sidebar">✕</button>
+                <button class="close-sidebar" id="close-sidebar" title="Close Menu">✕</button>
             </div>
-            <div class="info-content" style="padding: 20px;">
-                <p style="color: #ccc; font-size: 0.9rem;">Select a location on the map to see details here or on the floating card.</p>
+
+            <div class="sidebar-content">
+                
+                <div class="sidebar-section">
+                    <span class="section-title">Quick Explore</span>
+                    <div class="quick-grid">
+                        <div class="quick-item" onclick="handleQuickExplore('office')">
+                            <span class="q-icon">🏢</span>
+                            <span class="q-text">Offices</span>
+                        </div>
+                        <div class="quick-item" onclick="handleQuickExplore('lab')">
+                            <span class="q-icon">🔬</span>
+                            <span class="q-text">Labs</span>
+                        </div>
+                        <div class="quick-item" onclick="handleQuickExplore('canteen')">
+                            <span class="q-icon">🍴</span>
+                            <span class="q-text">Canteen</span>
+                        </div>
+                        <div class="quick-item" onclick="handleQuickExplore('gate')">
+                            <span class="q-icon">🚪</span>
+                            <span class="q-text">Gates</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CAMPUS EMERGENCY SECTION -->
+                <div class="sidebar-section">
+                    <div class="emergency-box">
+                        <span class="em-label">CAMPUS EMERGENCY</span>
+                        <div class="emergency-item">
+                            <span>Clinic:</span><strong>Local 123</strong>
+                        </div>
+                        <div class="emergency-item">
+                            <span>Security:</span><strong>(049) 501-XXXX</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ONLINE SERVICES LINKS -->
+                <div class="sidebar-section">
+                    <span class="section-title">Online Services</span>
+                    <ul class="link-list">
+                        <li><a href="https://portal.lu.edu.ph" target="_blank">🌐 LU Student Portal</a></li>
+                        <li><a href="https://facebook.com/LagunaUniversityOfficial" target="_blank">📘 Official Facebook</a></li>
+                        <li><a href="mailto:info@lu.edu.ph">📧 Contact Webmail</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="sidebar-footer">
+                <p>© 2024 Laguna University Navigator</p>
+                <small>v1.0.2 • Designed for LUnians</small>
             </div>
         </aside>
 
+        <!-- MAIN CONTENT AREA -->
         <main class="main-content">
-            <!-- FLOATING ROOM CARD -->
+            
+            
             <div class="room-card" id="room-card">
                 <div class="card-image-section">
-                    <button class="close-card-btn" id="close-card">✕</button>
+                    <button class="close-card-btn" id="close-card" title="Dismiss Card">✕</button>
                     <img id="card-img" src="assets/images/placeholder.jpg" alt="Room Photo">
                 </div>
                 <div class="card-details">
                     <h2 id="card-title">Room Name</h2>
                     <span id="card-tag" class="room-tag">Category</span>
-                    <p id="card-desc">Detailed information about this room or office will be displayed here.</p>
+                    <p id="card-desc">Detailed information will appear here.</p>
                     <div class="card-actions">
                         <button class="nav-btn" id="card-nav-btn">
                             <span>🚶</span> Get Directions
@@ -51,15 +111,16 @@
                 </div>
             </div>
 
-            <!-- SEARCH AREA -->
+            <!-- TOP SEARCH & FILTERS -->
             <div class="floating-search-container">
                 <div class="search-card">
-                    <button class="burger-menu-btn" id="burger-btn">
+                    <button class="burger-menu-btn" id="burger-btn" title="Open Sidebar">
                         <span></span><span></span><span></span>
                     </button>
                     <input type="text" id="map-search" placeholder="Search room, office, lab...">
                     <button class="search-btn">🔍</button>
                 </div>
+                
                 <div class="filter-row">
                     <button class="f-pill active" onclick="filterMarkers('all')">All</button>
                     <button class="f-pill" onclick="filterMarkers('office')">Offices</button>
@@ -68,47 +129,57 @@
                 </div>
             </div>
 
+            <!-- THE MAP -->
             <div id="map"></div>
 
-            <!-- MAP ACTIONS -->
+            <!-- MAP CONTROL BUTTONS (Bottom Right) -->
             <div class="floating-actions">
-                <button class="map-fab" id="btn-locate">🎯</button>
-                <button class="map-fab" id="btn-reset">🏠</button>
+                <button class="map-fab" id="btn-locate" title="Find My Location">🎯</button>
+                <button class="map-fab" id="btn-reset" title="Reset Map View">🏠</button>
             </div>
 
-            <!-- DISTANCE TOAST -->
-            <div id="distance-toast" class="toast hidden" style="position: absolute; top: 100px; left: 50%; transform: translateX(-50%); z-index: 1000;">
+            <!-- NAVIGATION TOAST (Navigation pill at the bottom) -->
+            <div id="distance-toast" class="toast hidden">
                 <div class="toast-body">
-                    <span id="target-name">Navigating...</span>
+                    <span id="target-name">Navigating to...</span>
                     <div class="toast-distance"><span id="dist-value">0</span>m away</div>
                 </div>
             </div>
+
         </main>
     </div>
 
+    <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <!-- Logic Scripts -->
     <script type="module" src="js/pages/public-map.js"></script>
-
+    
     <script>
-        // Sidebar Toggles
-        const burgerBtn = document.getElementById('burger-btn');
-        const closeSidebar = document.getElementById('close-sidebar');
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('sidebar-overlay');
+        // UI INTERACTION LOGIC
+        document.addEventListener('DOMContentLoaded', () => {
+            const burgerBtn = document.getElementById('burger-btn');
+            const closeSidebar = document.getElementById('close-sidebar');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            const closeCard = document.getElementById('close-card');
 
-        burgerBtn.addEventListener('click', () => {
-            sidebar.classList.add('active');
-            overlay.classList.add('active');
-        });
+            // Toggle Sidebar
+            burgerBtn.addEventListener('click', () => {
+                sidebar.classList.add('active');
+                overlay.classList.add('active');
+            });
 
-        [closeSidebar, overlay].forEach(el => el.addEventListener('click', () => {
-            sidebar.classList.remove('active');
-            overlay.classList.remove('active');
-        }));
+            // Close Sidebar (X or Overlay Click)
+            [closeSidebar, overlay].forEach(el => el.addEventListener('click', () => {
+                sidebar.classList.remove('active');
+                overlay.classList.remove('active');
+            }));
 
-        // Room Card Close
-        document.getElementById('close-card').addEventListener('click', () => {
-            document.getElementById('room-card').classList.remove('active');
+            // Close Room Detail Card
+            closeCard.addEventListener('click', () => {
+                document.getElementById('room-card').classList.remove('active');
+            });
         });
     </script>
 </body>
