@@ -23,57 +23,60 @@
 // ============================================================
 
 document.addEventListener('DOMContentLoaded', () => {
-  const form = document.getElementById('loginForm');
-  const emailInput = document.getElementById('loginEmail');
-  const passwordInput = document.getElementById('loginPassword');
-  const loginBtn = document.getElementById('loginBtn');
-  const errorBox = document.getElementById('loginError');
+  const form          = document.getElementById('loginForm');
+  const emailInput    = document.getElementById('emailInput');
+  const passwordInput = document.getElementById('passwordInput');
+  const loginBtn      = document.getElementById('loginBtn');
+  const btnText       = document.getElementById('loginBtnText');
+  const errorBox      = document.getElementById('loginError');
+  const errorMsg      = document.getElementById('loginErrorMsg');
 
   if (!emailInput || !passwordInput || !loginBtn) {
-    console.error('[login.js] Could not find loginEmail / loginPassword / loginBtn — check element IDs in index.html.');
+    console.error('[login.js] Could not find emailInput / passwordInput / loginBtn — check element IDs in index.html.');
     return;
   }
 
-  // Submit via <form> if present, otherwise fall back to a
-  // plain button click (in case index.html has no <form> wrapper).
+  // Submit via <form> or Enter key (index.html already has onsubmit="return false")
   if (form) {
     form.addEventListener('submit', (e) => {
       e.preventDefault();
       handleLogin();
     });
-  } else {
-    loginBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      handleLogin();
-    });
   }
 
+  // Also support Enter key on password field
+  passwordInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') handleLogin();
+  });
+
   function showError(message) {
-    if (!errorBox) {
-      console.error('[login.js] No #loginError element found. Message was:', message);
-      return;
-    }
-    errorBox.textContent = message;
+    errorMsg.textContent = message;
     errorBox.classList.remove('hidden');
   }
 
   function clearError() {
-    if (errorBox) errorBox.classList.add('hidden');
+    errorBox.classList.add('hidden');
   }
 
   function setLoading(isLoading) {
     loginBtn.disabled = isLoading;
-    loginBtn.textContent = isLoading ? 'Logging in…' : 'Log In';
+    if (isLoading) {
+      btnText.innerHTML = '<span class="login-spinner"></span> Signing in…';
+      loginBtn.classList.add('loading');
+    } else {
+      btnText.textContent = 'Sign In';
+      loginBtn.classList.remove('loading');
+    }
   }
 
   function handleLogin() {
-    const email = emailInput.value.trim();
+    const email    = emailInput.value.trim();
     const password = passwordInput.value;
 
     clearError();
 
     if (!email || !password) {
-      showError('Please enter both email and password.');
+      showError('Please fill in all fields.');
       return;
     }
 
@@ -81,9 +84,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     Promise.resolve(loginUser(email, password))
       .then((result) => {
-        const role = (result && result.role || '').toLowerCase();
-
-        if (role === 'superadmin' || role === 'super admin' || role === 'super_admin') {
+        const role = ((result && result.role) || '').toLowerCase().replace(/[_\s]/g, '');
+        if (role === 'superadmin') {
           window.location.href = 'superadmin/dashboard.html';
         } else if (role === 'admin') {
           window.location.href = 'admin/dashboard.html';

@@ -52,6 +52,29 @@ async function initMap() {
 }
 
 // ============================================================
+//  MARKER STYLES — color + emoji per type
+// ============================================================
+const TYPE_STYLE = {
+    office:    { color: '#1A5C38', emoji: '🏢' },
+    classroom: { color: '#2563EB', emoji: '📚' },
+    lab:       { color: '#7C3AED', emoji: '🔬' },
+    gym:       { color: '#D97706', emoji: '🏀' },
+    gate:      { color: '#DC2626', emoji: '🚪' },
+    canteen:   { color: '#059669', emoji: '🍴' },
+};
+
+function makeIcon(type) {
+    const s = TYPE_STYLE[type] || { color: '#1A5C38', emoji: '📍' };
+    return L.divIcon({
+        className: '',
+        html: `<div style="width:36px;height:36px;background:${s.color};border:3px solid white;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 2px 8px rgba(0,0,0,0.3);"><div style="transform:rotate(45deg);width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:13px;padding-bottom:4px;">${s.emoji}</div></div>`,
+        iconSize:    [36, 36],
+        iconAnchor:  [18, 36],
+        popupAnchor: [0, -38],
+    });
+}
+
+// ============================================================
 //  MARKERS
 // ============================================================
 function renderMarkers(category) {
@@ -61,7 +84,8 @@ function renderMarkers(category) {
         : allLocations.filter(loc => loc.type === category);
 
     filtered.forEach(loc => {
-        const marker = L.marker([loc.lat, loc.lng]);
+        const marker = L.marker([loc.lat, loc.lng], { icon: makeIcon(loc.type) });
+        marker.bindTooltip(loc.name, { permanent: false, direction: 'top', offset: [0, -38] });
         marker.on('click', () => handleLocationSelect(loc));
         markersLayer.addLayer(marker);
     });
@@ -378,6 +402,27 @@ function startLiveTracking() {
 // ============================================================
 function setupEventListeners() {
     const searchInput = document.getElementById('map-search');
+
+    // Real-time filtering while typing
+    searchInput.addEventListener('input', () => {
+        const val = searchInput.value.toLowerCase().trim();
+        if (!val) { renderMarkers('all'); return; }
+        markersLayer.clearLayers();
+        const results = allLocations.filter(l =>
+            l.name.toLowerCase().includes(val) ||
+            (l.type && l.type.toLowerCase().includes(val)) ||
+            (l.description && l.description.toLowerCase().includes(val))
+        );
+        results.forEach(loc => {
+            const marker = L.marker([loc.lat, loc.lng], { icon: makeIcon(loc.type) });
+            marker.bindTooltip(loc.name, { permanent: false, direction: 'top', offset: [0, -38] });
+            marker.on('click', () => handleLocationSelect(loc));
+            markersLayer.addLayer(marker);
+        });
+        if (results.length === 0) showWarning(`🔍 No results for "${searchInput.value}".`);
+    });
+
+    // Enter key — jump to first result
     searchInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
             const val   = searchInput.value.toLowerCase().trim();

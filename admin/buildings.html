@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Buildings — LU Campus Map</title>
+  <link rel="stylesheet" href="../css/main.css" />
+</head>
+<body class="app-shell">
+
+  <!-- ========== SIDEBAR ========== -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="sidebar-logo">LU</div>
+      <div class="sidebar-brand-text">
+        <span class="sidebar-brand-name">Laguna University</span>
+        <span class="sidebar-brand-sub">Admin Panel</span>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <span class="sidebar-nav-label">Navigation</span>
+      <a href="dashboard.html" class="sidebar-link">
+        <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg></span>
+        Map View
+      </a>
+      <a href="buildings.html" class="sidebar-link active">
+        <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></span>
+        Buildings
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-footer-user">
+        <div class="sidebar-avatar" id="sidebarAvatar">A</div>
+        <div class="sidebar-user-info">
+          <div class="sidebar-user-name" id="sidebarUserName">Admin</div>
+          <div class="sidebar-user-role">Administrator</div>
+        </div>
+      </div>
+      <button class="btn-logout" onclick="logoutUser()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Sign Out
+      </button>
+    </div>
+  </aside>
+
+  <!-- ========== MAIN ========== -->
+  <div class="main-content">
+    <header class="header">
+      <div class="header-left">
+        <div class="header-breadcrumb">
+          <span>Admin</span><span class="sep">›</span><span class="current">Buildings</span>
+        </div>
+      </div>
+      <div class="header-right">
+        <button class="btn-theme-toggle" onclick="toggleTheme()" title="Toggle dark mode">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        </button>
+        <div class="header-user">
+          <div class="header-avatar" id="headerAvatar">A</div>
+          <div>
+            <div class="header-user-name" id="headerUserName">Admin</div>
+            <div class="header-user-role">Administrator</div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="page-wrapper">
+      <div class="content-header">
+        <div class="content-header-left">
+          <h1 class="page-title">My Buildings</h1>
+          <p class="page-subtitle" id="buildingsCountLabel">Loading buildings…</p>
+        </div>
+        <div class="page-search-bar">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="search" id="searchInput" placeholder="Search buildings…" autocomplete="off" />
+        </div>
+      </div>
+
+      <div class="buildings-grid" id="buildingsGrid"></div>
+
+      <div class="empty-state hidden" id="emptyState">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+        <h3>No buildings yet</h3>
+        <p>Buildings you add from the map will appear here.</p>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/main.js"></script>
+  <script>
+    let _allBuildings = [];
+
+    function setHeaderName(name) {
+      document.getElementById('headerUserName').textContent  = name;
+      document.getElementById('sidebarUserName').textContent = name;
+      const i = name.charAt(0).toUpperCase();
+      document.getElementById('headerAvatar').textContent  = i;
+      document.getElementById('sidebarAvatar').textContent = i;
+    }
+
+    // Backend calls this with admin's own buildings
+    function renderBuildingsList(buildings) {
+      _allBuildings = buildings || [];
+      _renderGrid(_allBuildings);
+      document.getElementById('buildingsCountLabel').textContent =
+        `${_allBuildings.length} building${_allBuildings.length !== 1 ? 's' : ''}`;
+    }
+
+    function _renderGrid(list) {
+      const grid  = document.getElementById('buildingsGrid');
+      const empty = document.getElementById('emptyState');
+      if (!list || !list.length) { grid.innerHTML=''; empty.classList.remove('hidden'); return; }
+      empty.classList.add('hidden');
+      grid.innerHTML = list.map(b => `
+        <div class="building-card">
+          ${b.photo
+            ? `<img class="building-card-img" src="${b.photo}" alt="${b.name}" />`
+            : `<div class="building-card-img-placeholder"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></div>`}
+          <div class="building-card-body">
+            <div class="building-card-header">
+              <span class="building-card-name">${b.name}</span>
+              <span class="badge ${b.type === 'room' ? 'badge-room' : 'badge-building'}">${b.type || 'building'}</span>
+            </div>
+          </div>
+          <div class="building-card-footer">
+            <button class="btn btn-outline btn-sm" style="flex:1;justify-content:center;" onclick="openEditMarker('${b.id}')">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              Edit
+            </button>
+          </div>
+        </div>`).join('');
+    }
+
+    document.getElementById('searchInput').addEventListener('input', function() {
+      const q = this.value.toLowerCase().trim();
+      _renderGrid(q ? _allBuildings.filter(b => (b.name||'').toLowerCase().includes(q)) : _allBuildings);
+    });
+
+    function openEditMarker(id) {
+      if (typeof editMarker === 'function') editMarker(id);
+      else console.warn('[DEV] editMarker() not connected. ID:', id);
+    }
+
+    if (typeof logoutUser === 'undefined') window.logoutUser = () => console.warn('[DEV] logoutUser() not connected.');
+
+    window.setHeaderName       = setHeaderName;
+    window.renderBuildingsList = renderBuildingsList;
+
+    setTimeout(() => {
+      if (!_allBuildings.length) renderBuildingsList([]);
+    }, 800);
+  </script>
+</body>
+</html>

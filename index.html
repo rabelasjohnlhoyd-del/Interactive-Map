@@ -71,7 +71,6 @@
           class="btn-login"
           type="submit"
           id="loginBtn"
-          onclick="handleLogin()"
         >
           <span id="loginBtnText">Sign In</span>
         </button>
@@ -82,74 +81,29 @@
 
   </main>
 
-  <script src="js/pages/login.js"></script>
-  <script src="js/main.js"></script>
 
+  <!-- DEV MOCK — remove once backend loginUser() is connected -->
+  <!-- Test accounts:
+       admin@lu.edu.ph      / admin123  → admin/dashboard.html
+       superadmin@lu.edu.ph / super123  → superadmin/dashboard.html
+  -->
   <script>
-    /**
-     * handleLogin()
-     * Reads email and password, shows loading state,
-     * then calls loginUser(email, password) which is provided by the backend.
-     */
-    function handleLogin() {
-      const email    = document.getElementById('emailInput').value.trim();
-      const password = document.getElementById('passwordInput').value;
-      const btn      = document.getElementById('loginBtn');
-      const btnText  = document.getElementById('loginBtnText');
-      const errorBox = document.getElementById('loginError');
-      const errorMsg = document.getElementById('loginErrorMsg');
-
-      if (!email || !password) {
-        showLoginError('Please fill in all fields.');
-        return;
-      }
-
-      // Loading state
-      btn.disabled = true;
-      btn.classList.add('loading');
-      btnText.innerHTML = '<span class="login-spinner"></span> Signing in…';
-      errorBox.classList.add('hidden');
-
-      // ---- Backend hook ----
-      // loginUser(email, password) is defined by the backend developer.
-      // It should return a Promise that resolves on success or rejects with an error message.
-      if (typeof loginUser === 'function') {
-        loginUser(email, password)
-          .then(() => {
-            // Backend will handle redirect
-          })
-          .catch((err) => {
-            showLoginError(err?.message || 'Invalid email or password.');
-          })
-          .finally(() => {
-            btn.disabled = false;
-            btn.classList.remove('loading');
-            btnText.textContent = 'Sign In';
-          });
-      } else {
-        // Dev fallback — remove before production
-        console.warn('[DEV] loginUser() not defined. Backend not connected yet.');
-        setTimeout(() => {
-          btn.disabled = false;
-          btn.classList.remove('loading');
-          btnText.textContent = 'Sign In';
-          showLoginError('[Dev Mode] loginUser() is not yet connected.');
-        }, 1200);
-      }
+    if (typeof loginUser === 'undefined') {
+      window.loginUser = function(email, password) {
+        return new Promise((resolve, reject) => {
+          setTimeout(() => {
+            if (email === 'admin@lu.edu.ph' && password === 'admin123')
+              resolve({ role: 'admin', name: 'Juan Dela Cruz' });
+            else if (email === 'superadmin@lu.edu.ph' && password === 'super123')
+              resolve({ role: 'superadmin', name: 'Pedro Reyes' });
+            else
+              reject(new Error('Invalid email or password.'));
+          }, 700);
+        });
+      };
     }
-
-    function showLoginError(msg) {
-      const errorBox = document.getElementById('loginError');
-      const errorMsg = document.getElementById('loginErrorMsg');
-      errorMsg.textContent = msg;
-      errorBox.classList.remove('hidden');
-    }
-
-    // Allow Enter key to submit
-    document.getElementById('passwordInput').addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') handleLogin();
-    });
   </script>
+  <script src="js/pages/login.js"></script>
 
 </body>
 </html>

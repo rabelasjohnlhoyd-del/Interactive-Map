@@ -251,10 +251,11 @@
       document.getElementById('sidebarAvatar').textContent = initial;
     }
 
-    // --- Logout (backend hook) ---
-    function logoutUser() {
-      if (typeof logoutUser === 'function') return;
-      console.warn('[DEV] logoutUser() not connected.');
+    // --- Logout (backend hook — fallback stub for dev only) ---
+    if (typeof logoutUser === 'undefined') {
+      window.logoutUser = function () {
+        console.warn('[DEV] logoutUser() not yet connected.');
+      };
     }
 
     // --- Marker type toggle ---
