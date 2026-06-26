@@ -1,11 +1,7 @@
 // ============================================================
-//  LU Navigator — public-map.js  (v3 — fixed 0m + route bugs)
-//  - "..." shown while route is loading (not 0)
-//  - Straight-line distance used as fallback while OSRM loads
-//  - OSRM timeout: 8s, then fallback to straight line
-//  - Route line always draws (OSRM or fallback dashed)
-//  - Live GPS redraws route as you walk
-//  - Arrived detection at 15m
+//  LU Navigator — public-map.js (v5)
+//  No accuracy filter — agad lumabas ang blue dot kahit
+//  mahina ang signal. Accuracy shown sa dot tooltip lang.
 // ============================================================
 
 let map;
@@ -18,13 +14,13 @@ let allLocations      = [];
 let isNavigating      = false;
 let routeDrawPending  = false;
 let currentDestName   = '';
+let gpsReady          = false;
 
 // --- Campus Config ---
-const CAMPUS_CENTER      = L.latLng(14.2560, 121.4050);
-const CAMPUS_RADIUS_M    = 600;
-const GPS_MAX_ACCURACY_M = 80;
-const ARRIVED_RADIUS_M   = 15;
-const OSRM_TIMEOUT_MS    = 8000; // fallback after 8s
+const CAMPUS_CENTER    = L.latLng(14.2560, 121.4050);
+const CAMPUS_RADIUS_M  = 600;
+const ARRIVED_RADIUS_M = 15;
+const OSRM_TIMEOUT_MS  = 8000;
 
 const OSRM_BASE = 'https://router.project-osrm.org/route/v1/foot';
 
@@ -150,35 +146,25 @@ function startNavigation(lat, lng, name) {
     const distEl     = document.getElementById('dist-value');
 
     if (targetText) targetText.innerText = `Heading to ${name}`;
-
-    // Show "..." while route loads — never show 0
-    if (distEl) distEl.innerText = '...';
+    if (distEl)     distEl.innerText     = '...';
 
     if (toast) {
         toast.classList.remove('hidden');
         toast.style.display = 'flex';
     }
 
-    if (!userMarker) {
-        showWarning('📡 Waiting for GPS signal. Make sure location is enabled.');
-        // Will auto-draw when first GPS fix arrives in startLiveTracking
-        return;
+    if (gpsReady && userMarker) {
+        const userPos = userMarker.getLatLng();
+
+        if (userPos.distanceTo(CAMPUS_CENTER) > CAMPUS_RADIUS_M) {
+            showWarning('📍 You may be outside campus. Route shown from detected location.');
+        }
+
+        if (distEl) distEl.innerText = formatDist(Math.round(userPos.distanceTo(destinationCoords)));
+        drawFallbackLine(userPos, destinationCoords);
+        drawWalkingRoute(userPos, destinationCoords);
     }
-
-    const userPos = userMarker.getLatLng();
-
-    // Campus boundary check
-    if (userPos.distanceTo(CAMPUS_CENTER) > CAMPUS_RADIUS_M) {
-        showWarning(`📍 You may be outside campus. GPS might be off — try outdoors.`);
-    }
-
-    // Show straight-line distance immediately while OSRM loads
-    const straightDist = Math.round(userPos.distanceTo(destinationCoords));
-    if (distEl) distEl.innerText = formatDist(straightDist);
-    drawFallbackLine(userPos, destinationCoords);
-
-    // Then try to get real road route
-    drawWalkingRoute(userPos, destinationCoords);
+    // If no GPS yet — route draws automatically in onGPSUpdate when first fix arrives
 }
 
 // ============================================================
@@ -208,7 +194,6 @@ async function drawWalkingRoute(userPos, destPos) {
     const url = `${OSRM_BASE}/${userPos.lng},${userPos.lat};${destPos.lng},${destPos.lat}?overview=full&geometries=geojson`;
 
     try {
-        // Fetch with timeout
         const controller = new AbortController();
         const timer      = setTimeout(() => controller.abort(), OSRM_TIMEOUT_MS);
 
@@ -216,16 +201,13 @@ async function drawWalkingRoute(userPos, destPos) {
         clearTimeout(timer);
         const data = await res.json();
 
-        if (data.code !== 'Ok' || !data.routes?.length) {
-            throw new Error('No route in OSRM response');
-        }
+        if (data.code !== 'Ok' || !data.routes?.length) throw new Error('No route');
 
         const route    = data.routes[0];
         const coords   = route.geometry.coordinates.map(c => [c[1], c[0]]);
         const distM    = Math.round(route.distance);
         const walkMins = Math.ceil(route.duration / 60);
 
-        // Replace fallback line with real route
         if (routePolyline) map.removeLayer(routePolyline);
 
         routePolyline = L.polyline(coords, {
@@ -236,19 +218,13 @@ async function drawWalkingRoute(userPos, destPos) {
             lineCap:  'round'
         }).addTo(map);
 
-        // Update distance with real road distance
         const distEl = document.getElementById('dist-value');
         if (distEl) distEl.innerText = formatDist(distM);
 
         updateETA(walkMins);
 
     } catch (err) {
-        if (err.name === 'AbortError') {
-            console.warn('OSRM timeout — using straight-line fallback');
-        } else {
-            console.warn('OSRM error:', err.message);
-        }
-        // Fallback is already drawn; just update distance label
+        if (err.name !== 'AbortError') console.warn('OSRM error:', err.message);
         const distEl = document.getElementById('dist-value');
         if (distEl && userPos && destPos) {
             distEl.innerText = formatDist(Math.round(userPos.distanceTo(destPos)));
@@ -258,10 +234,9 @@ async function drawWalkingRoute(userPos, destPos) {
     routeDrawPending = false;
 }
 
-// Straight-line dashed fallback (shown immediately while OSRM loads)
+// Instant dashed fallback shown while OSRM fetches
 function drawFallbackLine(userPos, destPos) {
     if (routePolyline) map.removeLayer(routePolyline);
-
     routePolyline = L.polyline([userPos, destPos], {
         color:     '#064e3b',
         weight:    5,
@@ -294,7 +269,84 @@ function updateETA(walkMins) {
 }
 
 // ============================================================
-//  LIVE GPS — redraws route as you walk
+//  GPS UPDATE — no accuracy filter, always accepts the fix
+// ============================================================
+function onGPSUpdate(pos) {
+    const accuracy = pos.coords.accuracy;
+    const userPos  = L.latLng(pos.coords.latitude, pos.coords.longitude);
+
+    gpsReady = true;
+
+    // Blue dot — always show regardless of accuracy
+    if (!userMarker) {
+        userMarker = L.circleMarker(userPos, {
+            radius: 10, fillColor: '#2196F3',
+            color: 'white', weight: 3,
+            fillOpacity: 1, zIndexOffset: 1000
+        }).addTo(map);
+
+        // Tooltip shows accuracy so user knows signal quality
+        userMarker.bindTooltip(`📍 ±${Math.round(accuracy)}m accuracy`, {
+            permanent: false,
+            direction: 'top'
+        });
+    } else {
+        userMarker.setLatLng(userPos);
+        userMarker.setTooltipContent(`📍 ±${Math.round(accuracy)}m accuracy`);
+    }
+
+    // Accuracy ring — shows how precise the GPS is
+    if (!accuracyCircle) {
+        accuracyCircle = L.circle(userPos, {
+            radius: accuracy, color: '#2196F3',
+            fillColor: '#2196F3', fillOpacity: 0.08, weight: 1
+        }).addTo(map);
+    } else {
+        accuracyCircle.setLatLng(userPos);
+        accuracyCircle.setRadius(accuracy);
+    }
+
+    // Navigation just started but had no GPS yet — draw now
+    if (isNavigating && destinationCoords && !routePolyline) {
+        const distEl = document.getElementById('dist-value');
+        if (distEl) distEl.innerText = formatDist(Math.round(userPos.distanceTo(destinationCoords)));
+        drawFallbackLine(userPos, destinationCoords);
+        drawWalkingRoute(userPos, destinationCoords);
+        return;
+    }
+
+    // Live redraw while navigating
+    if (isNavigating && destinationCoords) {
+        const distLeft = userPos.distanceTo(destinationCoords);
+
+        if (distLeft <= ARRIVED_RADIUS_M) {
+            showWarning('🎉 You have arrived!');
+            stopNavigation();
+            return;
+        }
+
+        const distEl = document.getElementById('dist-value');
+        if (distEl && distEl.innerText === '...') {
+            distEl.innerText = formatDist(Math.round(distLeft));
+        }
+
+        drawWalkingRoute(userPos, destinationCoords);
+    }
+}
+
+function onGPSError(err) {
+    const msg = {
+        1: '❌ Location access denied. Enable it in browser settings.',
+        2: '📡 GPS unavailable. Move outdoors and try again.',
+        3: '⏱️ GPS signal slow. Move to an open area.'
+    };
+    showWarning(msg[err.code] || '❌ GPS error. Check your settings.');
+}
+
+// ============================================================
+//  LIVE GPS TRACKING
+//  getCurrentPosition = fast first fix
+//  watchPosition = continuous live updates after
 // ============================================================
 function startLiveTracking() {
     if (!navigator.geolocation) {
@@ -302,77 +354,21 @@ function startLiveTracking() {
         return;
     }
 
-    navigator.geolocation.watchPosition(
+    const hiAccuracy = { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 };
+
+    // Fast first fix (allows cached position up to 5s old for speed)
+    navigator.geolocation.getCurrentPosition(
         (pos) => {
-            const accuracy = pos.coords.accuracy;
-
-            if (accuracy > GPS_MAX_ACCURACY_M) {
-                showWarning(`📡 GPS weak (±${Math.round(accuracy)}m). Move outdoors for better signal.`);
-                return;
-            }
-
-            const userPos = L.latLng(pos.coords.latitude, pos.coords.longitude);
-
-            // Blue dot
-            if (!userMarker) {
-                userMarker = L.circleMarker(userPos, {
-                    radius: 10, fillColor: '#2196F3',
-                    color: 'white', weight: 3,
-                    fillOpacity: 1, zIndexOffset: 1000
-                }).addTo(map);
-            } else {
-                userMarker.setLatLng(userPos);
-            }
-
-            // Accuracy ring
-            if (!accuracyCircle) {
-                accuracyCircle = L.circle(userPos, {
-                    radius: accuracy, color: '#2196F3',
-                    fillColor: '#2196F3', fillOpacity: 0.10, weight: 1
-                }).addTo(map);
-            } else {
-                accuracyCircle.setLatLng(userPos);
-                accuracyCircle.setRadius(accuracy);
-            }
-
-            // If navigation just started but had no GPS yet — draw now
-            if (isNavigating && destinationCoords && !routePolyline) {
-                const straightDist = Math.round(userPos.distanceTo(destinationCoords));
-                const distEl       = document.getElementById('dist-value');
-                if (distEl) distEl.innerText = formatDist(straightDist);
-                drawFallbackLine(userPos, destinationCoords);
-                drawWalkingRoute(userPos, destinationCoords);
-                return;
-            }
-
-            // Live redraw while navigating
-            if (isNavigating && destinationCoords) {
-                const distLeft = userPos.distanceTo(destinationCoords);
-
-                if (distLeft <= ARRIVED_RADIUS_M) {
-                    showWarning('🎉 You have arrived!');
-                    stopNavigation();
-                    return;
-                }
-
-                // Update distance label in real time (straight-line while OSRM loads)
-                const distEl = document.getElementById('dist-value');
-                if (distEl && distEl.innerText === '...') {
-                    distEl.innerText = formatDist(Math.round(distLeft));
-                }
-
-                drawWalkingRoute(userPos, destinationCoords);
-            }
+            onGPSUpdate(pos);
+            // Then watch for live updates
+            navigator.geolocation.watchPosition(onGPSUpdate, onGPSError, hiAccuracy);
         },
         (err) => {
-            const msg = {
-                1: '❌ Location access denied. Enable it in browser settings.',
-                2: '📡 GPS unavailable. Move outdoors and try again.',
-                3: '⏱️ GPS timed out. Retrying...'
-            };
-            showWarning(msg[err.code] || '❌ GPS error. Check your settings.');
+            onGPSError(err);
+            // Still watch even if first fix failed
+            navigator.geolocation.watchPosition(onGPSUpdate, onGPSError, hiAccuracy);
         },
-        { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 5000 }
     );
 }
 
@@ -399,13 +395,15 @@ function setupEventListeners() {
     });
 
     document.getElementById('btn-locate').addEventListener('click', () => {
-        navigator.geolocation
-            ? navigator.geolocation.getCurrentPosition(
-                (pos) => map.flyTo(L.latLng(pos.coords.latitude, pos.coords.longitude), 18),
-                ()    => showWarning('❌ Could not get location. Make sure GPS is enabled.'),
-                { enableHighAccuracy: true }
-              )
-            : showWarning('❌ Geolocation not supported.');
+        if (!navigator.geolocation) { showWarning('❌ Geolocation not supported.'); return; }
+        navigator.geolocation.getCurrentPosition(
+            (pos) => {
+                onGPSUpdate(pos);
+                map.flyTo(L.latLng(pos.coords.latitude, pos.coords.longitude), 18);
+            },
+            () => showWarning('❌ Could not get location. Make sure GPS is enabled.'),
+            { enableHighAccuracy: true, timeout: 10000, maximumAge: 5000 }
+        );
     });
 }
 
