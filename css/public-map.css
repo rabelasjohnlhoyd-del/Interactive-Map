@@ -311,48 +311,205 @@ html, body {
 }
 
 /* ============================================
-   ROOM DETAILS CARD
+   ROOM DETAILS CARD — Enhanced
    ============================================ */
 
 .room-card {
   position: absolute;
   bottom: -100%; left: 50%;
   transform: translateX(-50%);
-  width: 90%; max-width: 400px;
+  width: 90%; max-width: 420px;
   background: white;
   border-radius: 20px;
   box-shadow: 0 10px 40px rgba(0,0,0,0.3);
   z-index: 2000; overflow: hidden;
   transition: bottom 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex; flex-direction: column;
+  max-height: 85vh;
 }
-.room-card.active { bottom: 30px; }
+.room-card.active { bottom: 20px; }
 
-.card-image-section { width: 100%; height: 180px; background: #eee; position: relative; }
+/* Image */
+.card-image-section {
+  width: 100%; height: 175px;
+  background: #e5e7eb; position: relative;
+  flex-shrink: 0;
+}
 .card-image-section img { width: 100%; height: 100%; object-fit: cover; }
 
 .close-card-btn {
   position: absolute; top: 10px; right: 10px;
-  background: rgba(0,0,0,0.4); color: white; border: none;
+  background: rgba(0,0,0,0.45); color: white; border: none;
   width: 30px; height: 30px; border-radius: 50%; cursor: pointer;
-  font-size: 16px;
+  font-size: 14px; display: flex; align-items: center; justify-content: center;
 }
 
-.card-details { padding: 20px; }
-.card-details h2 { margin: 0; font-size: 1.3rem; color: #333; }
+/* Favorite button */
+.card-fav-btn {
+  position: absolute; top: 10px; left: 10px;
+  background: rgba(0,0,0,0.45); border: none;
+  width: 30px; height: 30px; border-radius: 50%; cursor: pointer;
+  font-size: 14px; display: flex; align-items: center; justify-content: center;
+  transition: transform 0.2s;
+}
+.card-fav-btn:hover { transform: scale(1.2); }
+.card-fav-btn.active { background: rgba(220,38,38,0.5); }
+
+/* Details area — scrollable */
+.card-details {
+  flex: 1; overflow-y: auto;
+  padding: 16px 18px 0;
+  scrollbar-width: thin;
+  scrollbar-color: #e5e7eb transparent;
+}
+
+.card-details-top { margin-bottom: 12px; }
+.card-details h2 { margin: 0 0 6px; font-size: 1.2rem; color: #111; line-height: 1.3; }
+
+.card-meta-row {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  margin-bottom: 5px;
+}
+
 .room-tag {
   display: inline-block; background: #f0fdf4; color: #166534;
-  padding: 4px 12px; border-radius: 50px;
-  font-size: 0.7rem; font-weight: 700; margin-top: 5px;
+  padding: 3px 10px; border-radius: 50px;
+  font-size: 0.68rem; font-weight: 700;
   text-transform: capitalize;
 }
-.card-details p { font-size: 0.9rem; color: #666; line-height: 1.5; margin: 15px 0; }
+
+/* Open/Closed status */
+.card-status {
+  font-size: 0.68rem; font-weight: 600; padding: 3px 10px;
+  border-radius: 50px;
+}
+.card-status.open    { background: #dcfce7; color: #166534; }
+.card-status.closed  { background: #fee2e2; color: #991b1b; }
+.card-status.varies  { background: #fef3c7; color: #92400e; }
+
+.card-hours { font-size: 0.75rem; color: #6b7280; margin-top: 4px; }
+
+/* Tags / chips */
+.card-tags-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.card-chip {
+  background: #f3f4f6; color: #374151;
+  font-size: 0.65rem; font-weight: 500;
+  padding: 3px 10px; border-radius: 50px;
+  text-transform: capitalize;
+}
+
+/* ── Tabs ── */
+.card-tabs {
+  display: flex; gap: 6px;
+  border-bottom: 1px solid #e5e7eb;
+  margin: 0 -18px; padding: 0 18px;
+}
+
+.card-tab-btn {
+  background: none; border: none; cursor: pointer;
+  font-size: 0.78rem; font-weight: 600; color: #6b7280;
+  padding: 8px 12px; border-bottom: 2px solid transparent;
+  font-family: 'Inter', sans-serif; transition: all 0.2s;
+}
+.card-tab-btn:hover { color: #064e3b; }
+.card-tab-btn.active { color: #064e3b; border-bottom-color: #064e3b; }
+
+.card-tab-content { padding: 14px 0 0; }
+.card-tab-pane { display: none; }
+.card-tab-pane.active { display: block; }
+
+#card-desc { font-size: 0.875rem; color: #4b5563; line-height: 1.6; margin: 0; }
+
+/* ── Floors Accordion ── */
+.card-no-floors { font-size: 0.82rem; color: #9ca3af; padding: 10px 0; }
+
+.card-floor-item {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px; margin-bottom: 8px; overflow: hidden;
+}
+
+.card-floor-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 11px 14px; cursor: pointer; background: #f9fafb;
+  transition: background 0.15s;
+}
+.card-floor-header:hover { background: #f0fdf4; }
+.card-floor-header-left { display: flex; align-items: center; gap: 8px; }
+.card-floor-icon { font-size: 1rem; }
+.card-floor-name { font-size: 0.85rem; font-weight: 600; color: #111; }
+.card-floor-chevron {
+  font-size: 1.2rem; color: #9ca3af;
+  transition: transform 0.25s; line-height: 1;
+}
+.card-floor-item.open .card-floor-chevron { transform: rotate(90deg); }
+
+.card-floor-body {
+  max-height: 0; overflow: hidden;
+  transition: max-height 0.3s ease;
+  padding: 0 14px;
+}
+.card-floor-item.open .card-floor-body {
+  max-height: 600px; padding: 12px 14px;
+}
+
+.card-floor-college {
+  font-size: 0.72rem; font-weight: 600; color: #064e3b;
+  text-transform: uppercase; letter-spacing: 0.5px;
+  margin-bottom: 10px; padding: 4px 10px;
+  background: #f0fdf4; border-radius: 6px;
+}
+
+/* Faculty card */
+.card-faculty {
+  display: flex; align-items: center; gap: 10px;
+  background: #f9fafb; border-radius: 10px; padding: 10px;
+  margin-bottom: 10px; border: 1px solid #e5e7eb;
+}
+.card-faculty-avatar {
+  width: 40px; height: 40px; border-radius: 50%;
+  background: #064e3b; color: white;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem; font-weight: 700; flex-shrink: 0; overflow: hidden;
+}
+.card-faculty-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.card-faculty-info { display: flex; flex-direction: column; }
+.card-faculty-name { font-size: 0.82rem; font-weight: 600; color: #111; }
+.card-faculty-pos  { font-size: 0.7rem; color: #6b7280; margin-top: 2px; }
+
+/* Rooms list */
+.card-rooms-list { display: flex; flex-direction: column; gap: 6px; }
+
+.card-room-item {
+  display: flex; align-items: flex-start; gap: 8px;
+  padding: 8px 10px; border-radius: 8px;
+  background: #f9fafb; border: 1px solid #e5e7eb;
+}
+.card-room-item.is-faculty { background: #fff7ed; border-color: #fed7aa; }
+
+.card-room-icon { font-size: 0.9rem; flex-shrink: 0; margin-top: 1px; }
+.card-room-body { flex: 1; min-width: 0; }
+.card-room-name { display: block; font-size: 0.8rem; font-weight: 600; color: #111; }
+.card-room-desc { display: block; font-size: 0.7rem; color: #6b7280; margin-top: 2px; line-height: 1.4; }
+
+.card-room-badge {
+  font-size: 0.6rem; font-weight: 700;
+  background: #fed7aa; color: #92400e;
+  padding: 2px 7px; border-radius: 50px;
+  flex-shrink: 0; align-self: flex-start; margin-top: 2px;
+}
+
+/* Actions */
+.card-actions {
+  position: sticky; bottom: 0; background: white;
+  border-top: 1px solid #f3f4f6;
+  margin: 0 -18px; padding: 14px 18px 16px;
+}
 
 .nav-btn {
   width: 100%; background: #064e3b; color: white; border: none;
-  padding: 12px; border-radius: 10px; font-weight: 600; cursor: pointer;
+  padding: 13px; border-radius: 12px; font-weight: 600; cursor: pointer;
   display: flex; align-items: center; justify-content: center; gap: 8px;
-  font-family: 'Inter', sans-serif; font-size: 0.95rem;
-  transition: background 0.2s;
+  font-family: 'Inter', sans-serif; font-size: 0.95rem; transition: background 0.2s;
 }
 .nav-btn:hover { background: #065f46; }
 

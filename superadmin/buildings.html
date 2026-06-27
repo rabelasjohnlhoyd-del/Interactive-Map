@@ -6,9 +6,8 @@
   <title>All Buildings — LU Campus Map</title>
   <link rel="stylesheet" href="../css/main.css" />
 </head>
-<body>
+<body class="app-shell">
 
-  <div class="app-shell">
 
     <!-- ======== SIDEBAR ======== -->
     <aside class="sidebar" id="sidebar">
@@ -177,8 +176,6 @@
     </div>
     <!-- /.main-content -->
 
-  </div>
-  <!-- /.app-shell -->
 
   <!-- ======== ARCHIVE CONFIRM DIALOG ======== -->
   <div class="modal-overlay confirm-dialog" id="confirmOverlay" role="dialog" aria-modal="true" aria-labelledby="archiveConfirmTitle">
@@ -200,6 +197,14 @@
   </div>
 
   <script src="../js/pages/superadmin-buildings.js"></script>
+  <script src="../js/main.js"></script>
+  <script src="../js/components/sidebar.js"></script>
+  <script src="../js/components/buildingCard.js"></script>
+  <script src="../js/components/modal.js"></script>
+  <script>
+    if (typeof logoutUser === 'undefined')
+      window.logoutUser = () => console.warn('[DEV] logoutUser() not connected.');
+  </script>
 
 </body>
 </html>

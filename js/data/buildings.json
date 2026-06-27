@@ -1,194 +1,730 @@
 [
-  { 
-    "name": "Oreta Building", 
-    "type": "office", 
-    "lat": 14.25564, "lng": 121.40778, 
+  {
+    "id": "oreta-building",
+    "name": "Oreta Building",
+    "type": "office",
+    "lat": 14.25564,
+    "lng": 121.40778,
     "image": "assets/images/oreta.jpg",
-    "description": "The main administrative building of Laguna University, housing major department offices.",
-    "hours": "8:00 AM - 5:00 PM"
+    "description": "The main administrative building of Laguna University, housing major department offices including the Office of the President and key administrative units.",
+    "hours": "8:00 AM - 5:00 PM",
+    "tags": ["admin", "office", "executive"],
+    "floors": [
+      {
+        "id": "oreta-gf",
+        "name": "Ground Floor",
+        "colleges": "Administration & Finance",
+        "floorPhoto": "assets/images/floors/oreta-gf.jpg",
+        "orgChart": "assets/images/orgcharts/oreta-gf-org.jpg",
+        "faculty": {
+          "name": "Juan Dela Cruz",
+          "position": "Building Administrator",
+          "photo": "assets/images/faculty/oreta-admin.jpg"
+        },
+        "rooms": [
+          { "id": "oreta-gf-cashier", "name": "Cashier Office", "description": "Payment center for tuition and miscellaneous fees.", "isFaculty": false },
+          { "id": "oreta-gf-hrmo", "name": "HRMO Office", "description": "Human Resource Management Office for faculty and staff.", "isFaculty": false },
+          { "id": "oreta-gf-security", "name": "Security Office", "description": "Campus security administration and monitoring.", "isFaculty": false }
+        ]
+      },
+      {
+        "id": "oreta-2f",
+        "name": "Second Floor",
+        "colleges": "Executive Offices",
+        "floorPhoto": "assets/images/floors/oreta-2f.jpg",
+        "orgChart": "assets/images/orgcharts/oreta-2f-org.jpg",
+        "faculty": {
+          "name": "Dr. Maria Santos",
+          "position": "University President",
+          "photo": "assets/images/faculty/president.jpg"
+        },
+        "rooms": [
+          { "id": "oreta-2f-president", "name": "Office of the President", "description": "Executive office of the University President.", "isFaculty": true },
+          { "id": "oreta-2f-vp", "name": "VP Academic Affairs", "description": "Office overseeing all academic programs and policies.", "isFaculty": true },
+          { "id": "oreta-2f-boardroom", "name": "Board Room", "description": "Main conference room for executive meetings.", "isFaculty": false }
+        ]
+      }
+    ]
   },
-  { 
-    "name": "Gate 1", 
-    "type": "gate", 
-    "lat": 14.25557, "lng": 121.40067, 
-    "image": "assets/images/gate1.jpg",
-    "description": "The primary entrance for students and vehicles entering the campus.",
-    "hours": "24/7 Open"
-  },
-  { 
-    "name": "Gate 2", 
-    "type": "gate", 
-    "lat": 14.25626, "lng": 121.40779, 
-    "image": "assets/images/gate2.jpg",
-    "description": "The secondary entrance and exit point located near the sports complex.",
-    "hours": "24/7 Open"
-  },
-  { 
-    "name": "Athlete's Village", 
-    "type": "office", 
-    "lat": 14.25490, "lng": 121.40754, 
-    "image": "assets/images/athlete.jpg",
-    "description": "Housing facility for Laguna University's student athletes.",
-    "hours": "Resident Access Only"
-  },
-  { 
-    "name": "Jose Rizal Monument", 
-    "type": "office", 
-    "lat": 14.255775, "lng": 121.40572, 
-    "image": "assets/images/rizal.jpg",
-    "description": "A landmark monument dedicated to the national hero, located at the center of the campus.",
-    "hours": "Open Area"
-  },
-  { 
-    "name": "LU 01 - LU 06", 
-    "type": "classroom", 
-    "lat": 14.25674, "lng": 121.40529, 
+  {
+    "id": "lu-01-06",
+    "name": "LU 01 - LU 06",
+    "type": "classroom",
+    "lat": 14.25674,
+    "lng": 121.40529,
     "image": "assets/images/lu01-06.jpg",
-    "description": "Main classroom block for General Education and basic college courses.",
-    "hours": "7:00 AM - 7:00 PM"
+    "description": "Main classroom block for General Education and basic college courses. Houses six interconnected rooms designed for large lecture classes.",
+    "hours": "7:00 AM - 7:00 PM",
+    "tags": ["classroom", "general education", "lecture"],
+    "floors": [
+      {
+        "id": "lu01-06-gf",
+        "name": "Ground Floor",
+        "colleges": "College of Arts and Sciences — General Education",
+        "floorPhoto": "assets/images/floors/lu01-06-gf.jpg",
+        "orgChart": null,
+        "faculty": {
+          "name": "Prof. Anna Reyes",
+          "position": "GE Department Coordinator",
+          "photo": "assets/images/faculty/ge-coord.jpg"
+        },
+        "rooms": [
+          { "id": "lu01", "name": "LU 01", "description": "Large lecture room, capacity 60 students.", "isFaculty": false },
+          { "id": "lu02", "name": "LU 02", "description": "General purpose classroom, capacity 50 students.", "isFaculty": false },
+          { "id": "lu03", "name": "LU 03", "description": "General purpose classroom, capacity 50 students.", "isFaculty": false }
+        ]
+      },
+      {
+        "id": "lu01-06-2f",
+        "name": "Second Floor",
+        "colleges": "College of Arts and Sciences — General Education",
+        "floorPhoto": "assets/images/floors/lu01-06-2f.jpg",
+        "orgChart": null,
+        "faculty": null,
+        "rooms": [
+          { "id": "lu04", "name": "LU 04", "description": "General purpose classroom, capacity 50 students.", "isFaculty": false },
+          { "id": "lu05", "name": "LU 05", "description": "General purpose classroom, capacity 50 students.", "isFaculty": false },
+          { "id": "lu06", "name": "LU 06", "description": "Seminar room with projector setup, capacity 35 students.", "isFaculty": false }
+        ]
+      }
+    ]
   },
-  { 
-    "name": "CHS Laboratory / LU 07", 
-    "type": "lab", 
-    "lat": 14.25619, "lng": 121.40553, 
+  {
+    "id": "chs-lab-lu07",
+    "name": "CHS Laboratory / LU 07",
+    "type": "lab",
+    "lat": 14.25619,
+    "lng": 121.40553,
     "image": "assets/images/chs_lab.jpg",
-    "description": "College of Health Sciences Laboratory for Nursing and Allied Health students.",
-    "hours": "8:00 AM - 5:00 PM"
+    "description": "College of Health Sciences Laboratory for Nursing and Allied Health students. Equipped with medical simulation equipment and health science tools.",
+    "hours": "8:00 AM - 5:00 PM",
+    "tags": ["lab", "health sciences", "nursing", "allied health"],
+    "floors": [
+      {
+        "id": "chs-gf",
+        "name": "Ground Floor",
+        "colleges": "College of Health Sciences (CHS)",
+        "floorPhoto": "assets/images/floors/chs-gf.jpg",
+        "orgChart": "assets/images/orgcharts/chs-org.jpg",
+        "faculty": {
+          "name": "Dr. Lourdes Mendoza",
+          "position": "CHS Dean",
+          "photo": "assets/images/faculty/chs-dean.jpg"
+        },
+        "rooms": [
+          { "id": "chs-nursing-lab", "name": "Nursing Skills Lab", "description": "Simulation lab for basic and advanced nursing procedures.", "isFaculty": false },
+          { "id": "chs-anatomy-lab", "name": "Anatomy & Physiology Lab", "description": "Laboratory for A&P subjects with anatomical models.", "isFaculty": false },
+          { "id": "chs-faculty-rm", "name": "CHS Faculty Room", "description": "Faculty area for CHS instructors.", "isFaculty": true }
+        ]
+      }
+    ]
   },
-  { 
-    "name": "SHS Faculty / LU 09", 
-    "type": "office", 
-    "lat": 14.25625, "lng": 121.40565, 
+  {
+    "id": "shs-faculty-lu09",
+    "name": "SHS Faculty / LU 09",
+    "type": "office",
+    "lat": 14.25625,
+    "lng": 121.40565,
     "image": "assets/images/shs_faculty.jpg",
-    "description": "The central office for Senior High School faculty and coordinators.",
-    "hours": "8:00 AM - 5:00 PM"
+    "description": "The central office for Senior High School faculty and coordinators. Houses SHS department heads and academic advisors.",
+    "hours": "8:00 AM - 5:00 PM",
+    "tags": ["SHS", "senior high school", "faculty", "office"],
+    "floors": [
+      {
+        "id": "shs-gf",
+        "name": "Ground Floor",
+        "colleges": "Senior High School Department",
+        "floorPhoto": "assets/images/floors/shs-gf.jpg",
+        "orgChart": "assets/images/orgcharts/shs-org.jpg",
+        "faculty": {
+          "name": "Ms. Carla Bautista",
+          "position": "SHS Principal",
+          "photo": "assets/images/faculty/shs-principal.jpg"
+        },
+        "rooms": [
+          { "id": "shs-principal", "name": "SHS Principal's Office", "description": "Office of the Senior High School Principal.", "isFaculty": true },
+          { "id": "shs-coord", "name": "SHS Coordinator's Office", "description": "Academic and student affairs coordination for SHS.", "isFaculty": true },
+          { "id": "shs-faculty-lounge", "name": "SHS Faculty Lounge", "description": "Rest and work area for SHS faculty members.", "isFaculty": true }
+        ]
+      }
+    ]
   },
-  { 
-    "name": "LU 10", 
-    "type": "classroom", 
-    "lat": 14.25634, "lng": 121.40560, 
+  {
+    "id": "lu-10",
+    "name": "LU 10",
+    "type": "classroom",
+    "lat": 14.25634,
+    "lng": 121.40560,
     "image": "assets/images/lu10.jpg",
-    "description": "General purpose classroom for various college departments.",
-    "hours": "7:00 AM - 6:00 PM"
+    "description": "General purpose classroom building for various college departments. Frequently used for examinations and special lectures.",
+    "hours": "7:00 AM - 6:00 PM",
+    "tags": ["classroom"],
+    "floors": [
+      {
+        "id": "lu10-gf",
+        "name": "Ground Floor",
+        "colleges": "Multiple Departments",
+        "floorPhoto": "assets/images/floors/lu10-gf.jpg",
+        "orgChart": null,
+        "faculty": null,
+        "rooms": [
+          { "id": "lu10-rm1", "name": "LU 10 - Room A", "description": "Lecture room, capacity 55 students.", "isFaculty": false },
+          { "id": "lu10-rm2", "name": "LU 10 - Room B", "description": "Lecture room, capacity 55 students.", "isFaculty": false }
+        ]
+      }
+    ]
   },
-  { 
-    "name": "Records Office / LU 11", 
-    "type": "office", 
-    "lat": 14.25640, "lng": 121.40557, 
+  {
+    "id": "records-lu11",
+    "name": "Records Office / LU 11",
+    "type": "office",
+    "lat": 14.25640,
+    "lng": 121.40557,
     "image": "assets/images/records.jpg",
-    "description": "The office responsible for the maintenance of student permanent records and files.",
-    "hours": "8:00 AM - 5:00 PM"
+    "description": "The office responsible for the maintenance of student permanent records, transcripts of records, and official documents.",
+    "hours": "8:00 AM - 5:00 PM",
+    "tags": ["records", "TOR", "documents", "office"],
+    "floors": [
+      {
+        "id": "records-gf",
+        "name": "Ground Floor",
+        "colleges": "Office of the Registrar — Records Division",
+        "floorPhoto": "assets/images/floors/records-gf.jpg",
+        "orgChart": null,
+        "faculty": {
+          "name": "Ms. Rowena Garcia",
+          "position": "Records Officer-in-Charge",
+          "photo": "assets/images/faculty/records-oic.jpg"
+        },
+        "rooms": [
+          { "id": "records-main", "name": "Records Main Office", "description": "Student records retrieval, certification, and authentication.", "isFaculty": false },
+          { "id": "records-archive", "name": "Document Archives", "description": "Storage of historical student and institutional records.", "isFaculty": false }
+        ]
+      }
+    ]
   },
-  { 
-    "name": "Registrar / LU 13-14", 
-    "type": "office", 
-    "lat": 14.25658, "lng": 121.40549, 
+  {
+    "id": "registrar-lu13-14",
+    "name": "Registrar / LU 13-14",
+    "type": "office",
+    "lat": 14.25658,
+    "lng": 121.40549,
     "image": "assets/images/registrar.jpg",
-    "description": "The office for enrollment, grades, transcripts, and other academic documentation.",
-    "hours": "8:00 AM - 5:00 PM"
+    "description": "The office for enrollment, grades submission, transcripts, and other academic documentation. Primary contact for all student academic records.",
+    "hours": "8:00 AM - 5:00 PM",
+    "tags": ["registrar", "enrollment", "grades", "TOR", "office"],
+    "floors": [
+      {
+        "id": "registrar-gf",
+        "name": "Ground Floor",
+        "colleges": "Office of the Registrar",
+        "floorPhoto": "assets/images/floors/registrar-gf.jpg",
+        "orgChart": "assets/images/orgcharts/registrar-org.jpg",
+        "faculty": {
+          "name": "Mr. Roberto Villanueva",
+          "position": "University Registrar",
+          "photo": "assets/images/faculty/registrar.jpg"
+        },
+        "rooms": [
+          { "id": "reg-enroll", "name": "Enrollment Counter", "description": "Walk-in counter for enrollment and subject enrollment concerns.", "isFaculty": false },
+          { "id": "reg-grades", "name": "Grades Window", "description": "Submission and inquiry counter for student grades.", "isFaculty": false },
+          { "id": "reg-tor", "name": "TOR / Documents Window", "description": "Request and release of Transcript of Records and other official documents.", "isFaculty": false },
+          { "id": "reg-oic", "name": "Registrar's Office", "description": "Office of the University Registrar.", "isFaculty": true }
+        ]
+      }
+    ]
   },
-  { 
-    "name": "University Clinic / LU 16", 
-    "type": "office", 
-    "lat": 14.25675, "lng": 121.40542, 
+  {
+    "id": "clinic-lu16",
+    "name": "University Clinic / LU 16",
+    "type": "office",
+    "lat": 14.25675,
+    "lng": 121.40542,
     "image": "assets/images/clinic.jpg",
-    "description": "Provides medical and first-aid services to students and faculty members.",
-    "hours": "8:00 AM - 5:00 PM"
+    "description": "Provides medical and first-aid services to students, faculty, and staff. Houses a licensed nurse and visiting physician.",
+    "hours": "8:00 AM - 5:00 PM",
+    "tags": ["clinic", "medical", "first aid", "health"],
+    "floors": [
+      {
+        "id": "clinic-gf",
+        "name": "Ground Floor",
+        "colleges": "University Health Services",
+        "floorPhoto": "assets/images/floors/clinic-gf.jpg",
+        "orgChart": null,
+        "faculty": {
+          "name": "RN Maria Conception",
+          "position": "University Nurse",
+          "photo": "assets/images/faculty/nurse.jpg"
+        },
+        "rooms": [
+          { "id": "clinic-consult", "name": "Consultation Room", "description": "Medical consultation area for students and staff.", "isFaculty": false },
+          { "id": "clinic-rest", "name": "Rest Area / Beds", "description": "Resting area with beds for sick students.", "isFaculty": false },
+          { "id": "clinic-pharmacy", "name": "Medicine Dispensary", "description": "Basic medicines and first-aid supplies.", "isFaculty": false }
+        ]
+      }
+    ]
   },
-  { 
-    "name": "Research Center / LU 17", 
-    "type": "office", 
-    "lat": 14.25686, "lng": 121.40537, 
+  {
+    "id": "research-lu17",
+    "name": "Research Center / LU 17",
+    "type": "office",
+    "lat": 14.25686,
+    "lng": 121.40537,
     "image": "assets/images/research.jpg",
-    "description": "The hub for academic research and university publication services.",
-    "hours": "8:00 AM - 5:00 PM"
+    "description": "The hub for academic research, publication services, and institutional studies. Supports faculty and student research initiatives.",
+    "hours": "8:00 AM - 5:00 PM",
+    "tags": ["research", "publication", "office"],
+    "floors": [
+      {
+        "id": "research-gf",
+        "name": "Ground Floor",
+        "colleges": "Office of Research and Publication",
+        "floorPhoto": "assets/images/floors/research-gf.jpg",
+        "orgChart": "assets/images/orgcharts/research-org.jpg",
+        "faculty": {
+          "name": "Dr. Emmanuel Cruz",
+          "position": "Research Director",
+          "photo": "assets/images/faculty/research-dir.jpg"
+        },
+        "rooms": [
+          { "id": "research-main", "name": "Research Office", "description": "Main office for research coordination and consultation.", "isFaculty": true },
+          { "id": "research-lib", "name": "Research Library", "description": "Collection of journals, theses, and dissertations.", "isFaculty": false }
+        ]
+      }
+    ]
   },
-  { 
-    "name": "HRMO / LU 18", 
-    "type": "office", 
-    "lat": 14.25692, "lng": 121.40534, 
+  {
+    "id": "hrmo-lu18",
+    "name": "HRMO / LU 18",
+    "type": "office",
+    "lat": 14.25692,
+    "lng": 121.40534,
     "image": "assets/images/hrmo.jpg",
-    "description": "Human Resource Management Office for faculty and staff services.",
-    "hours": "8:00 AM - 5:00 PM"
+    "description": "Human Resource Management Office handling faculty and staff employment records, benefits, leaves, and payroll coordination.",
+    "hours": "8:00 AM - 5:00 PM",
+    "tags": ["HR", "human resource", "payroll", "office"],
+    "floors": [
+      {
+        "id": "hrmo-gf",
+        "name": "Ground Floor",
+        "colleges": "Human Resource Management Office",
+        "floorPhoto": "assets/images/floors/hrmo-gf.jpg",
+        "orgChart": "assets/images/orgcharts/hrmo-org.jpg",
+        "faculty": {
+          "name": "Ms. Jennifer Pascual",
+          "position": "HRMO Director",
+          "photo": "assets/images/faculty/hrmo-dir.jpg"
+        },
+        "rooms": [
+          { "id": "hrmo-main", "name": "HRMO Main Office", "description": "Walk-in counter for HR concerns.", "isFaculty": false },
+          { "id": "hrmo-payroll", "name": "Payroll Section", "description": "Processing of faculty and staff compensation.", "isFaculty": false }
+        ]
+      }
+    ]
   },
-  { 
-    "name": "Cashier / LU 19", 
-    "type": "office", 
-    "lat": 14.25699, "lng": 121.40531, 
+  {
+    "id": "cashier-lu19",
+    "name": "Cashier / LU 19",
+    "type": "office",
+    "lat": 14.25699,
+    "lng": 121.40531,
     "image": "assets/images/cashier.jpg",
-    "description": "The central office for tuition payments and other financial transactions.",
-    "hours": "8:00 AM - 4:00 PM"
+    "description": "The central office for tuition payments, miscellaneous fees, and other financial transactions. Accepts cash and online payment validation.",
+    "hours": "8:00 AM - 4:00 PM",
+    "tags": ["cashier", "payment", "tuition", "finance"],
+    "floors": [
+      {
+        "id": "cashier-gf",
+        "name": "Ground Floor",
+        "colleges": "Finance Office — Cashiering Division",
+        "floorPhoto": "assets/images/floors/cashier-gf.jpg",
+        "orgChart": null,
+        "faculty": {
+          "name": "Ms. Teresita Abad",
+          "position": "Chief Cashier",
+          "photo": "assets/images/faculty/cashier-chief.jpg"
+        },
+        "rooms": [
+          { "id": "cashier-window1", "name": "Payment Window 1 (A–L)", "description": "Payment counter for students with surnames A to L.", "isFaculty": false },
+          { "id": "cashier-window2", "name": "Payment Window 2 (M–Z)", "description": "Payment counter for students with surnames M to Z.", "isFaculty": false },
+          { "id": "cashier-online", "name": "Online Payment Validation", "description": "Counter for validating GCash, bank transfer, and online payments.", "isFaculty": false }
+        ]
+      }
+    ]
   },
-  { 
-    "name": "Admin Office / LU 20", 
-    "type": "office", 
-    "lat": 14.25705, "lng": 121.40529, 
+  {
+    "id": "admin-lu20",
+    "name": "Admin Office / LU 20",
+    "type": "office",
+    "lat": 14.25705,
+    "lng": 121.40529,
     "image": "assets/images/admin_main.jpg",
-    "description": "Executive office of the university administration.",
-    "hours": "8:00 AM - 5:00 PM"
+    "description": "Executive office of the university administration. Handles institutional directives, communications, and university-wide policies.",
+    "hours": "8:00 AM - 5:00 PM",
+    "tags": ["admin", "executive", "office"],
+    "floors": [
+      {
+        "id": "admin-gf",
+        "name": "Ground Floor",
+        "colleges": "Office of University Administration",
+        "floorPhoto": "assets/images/floors/admin-gf.jpg",
+        "orgChart": "assets/images/orgcharts/admin-org.jpg",
+        "faculty": {
+          "name": "Atty. Renato Oreta",
+          "position": "University Administrator",
+          "photo": "assets/images/faculty/admin.jpg"
+        },
+        "rooms": [
+          { "id": "admin-main", "name": "Administration Office", "description": "Main reception and admin coordination office.", "isFaculty": false },
+          { "id": "admin-exec", "name": "Executive Conference Room", "description": "Private meeting room for administrative officers.", "isFaculty": true },
+          { "id": "admin-osas", "name": "OSAS Office", "description": "Office of Student Affairs and Services.", "isFaculty": false }
+        ]
+      }
+    ]
   },
-  { 
-    "name": "San Luis Gym", 
-    "type": "gym", 
-    "lat": 14.25523, "lng": 121.40620, 
-    "image": "assets/images/san_luis_gym.jpg",
-    "description": "Major sports and events venue for university-wide gatherings.",
-    "hours": "Depends on Schedule"
-  },
-  { 
-    "name": "Multi-Purpose Gym", 
-    "type": "gym", 
-    "lat": 14.25467, "lng": 121.40630, 
-    "image": "assets/images/mp_gym.jpg",
-    "description": "Facility for basketball, volleyball, and physical education classes.",
-    "hours": "Depends on Schedule"
-  },
-  { 
-    "name": "Pool Area", 
-    "type": "gym", 
-    "lat": 14.25547, "lng": 121.40677, 
-    "image": "assets/images/pool.jpg",
-    "description": "Laguna Sports Complex swimming facility used for P.E. and swim competitions.",
-    "hours": "6:00 AM - 5:00 PM"
-  },
-  { 
-    "name": "New Building", 
-    "type": "classroom", 
-    "lat": 14.25426, "lng": 121.40904, 
-    "image": "assets/images/new_building.jpg",
-    "description": "The newest academic building with modern classroom facilities.",
-    "hours": "7:00 AM - 8:00 PM"
-  },
-  { 
-    "name": "Canteen", 
-    "type": "office", 
-    "lat": 14.25606, "lng": 121.40594, 
-    "image": "assets/images/canteen.jpg",
-    "description": "Main food court and student cafeteria area.",
-    "hours": "7:00 AM - 5:00 PM"
-  },
-  { 
-    "name": "M.E Offices", 
-    "type": "office", 
-    "lat": 14.25506, "lng": 121.40684, 
-    "image": "assets/images/me_building.jpg",
-    "description": "Offices for Mechanical Engineering faculty and coordinators.",
-    "hours": "8:00 AM - 5:00 PM"
-  },
-  { 
-    "name": "Science Labs (Chem/Bio/Phys)", 
-    "type": "lab", 
-    "lat": 14.25510, "lng": 121.40691, 
-    "image": "assets/images/science_labs.jpg",
-    "description": "State-of-the-art laboratories for Chemistry, Biology, and Physics experiments.",
-    "hours": "8:00 AM - 5:00 PM"
-  },
-  { 
-    "name": "Annex Building", 
-    "type": "office", 
-    "lat": 14.25654, "lng": 121.40542, 
+  {
+    "id": "annex-building",
+    "name": "Annex Building",
+    "type": "office",
+    "lat": 14.25654,
+    "lng": 121.40542,
     "image": "assets/images/annex.jpg",
-    "description": "Additional administrative and academic support offices.",
-    "hours": "8:00 AM - 5:00 PM"
+    "description": "Additional administrative and academic support offices. Houses overflow offices and support departments.",
+    "hours": "8:00 AM - 5:00 PM",
+    "tags": ["annex", "office", "support"],
+    "floors": [
+      {
+        "id": "annex-gf",
+        "name": "Ground Floor",
+        "colleges": "Various Support Offices",
+        "floorPhoto": "assets/images/floors/annex-gf.jpg",
+        "orgChart": null,
+        "faculty": null,
+        "rooms": [
+          { "id": "annex-guidance", "name": "Guidance Office", "description": "Counseling and student guidance services.", "isFaculty": false },
+          { "id": "annex-scholar", "name": "Scholarship Office", "description": "Scholarships, grants, and financial aid processing.", "isFaculty": false },
+          { "id": "annex-ssc", "name": "Supreme Student Council Office", "description": "Student government office.", "isFaculty": false }
+        ]
+      },
+      {
+        "id": "annex-2f",
+        "name": "Second Floor",
+        "colleges": "Academic Support Offices",
+        "floorPhoto": "assets/images/floors/annex-2f.jpg",
+        "orgChart": null,
+        "faculty": null,
+        "rooms": [
+          { "id": "annex-itroom", "name": "IT Support Room", "description": "Technical support for student and faculty digital concerns.", "isFaculty": false },
+          { "id": "annex-library", "name": "Reading Room", "description": "Quiet study area and supplemental library.", "isFaculty": false }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "san-luis-gym",
+    "name": "San Luis Gym",
+    "type": "gym",
+    "lat": 14.25523,
+    "lng": 121.40620,
+    "image": "assets/images/san_luis_gym.jpg",
+    "description": "Major sports and events venue for university-wide gatherings, commencement exercises, and sports competitions.",
+    "hours": "Depends on Schedule",
+    "tags": ["gym", "sports", "events", "basketball"],
+    "floors": [
+      {
+        "id": "slgym-main",
+        "name": "Main Court",
+        "colleges": "Physical Education Department",
+        "floorPhoto": "assets/images/floors/slgym-main.jpg",
+        "orgChart": null,
+        "faculty": {
+          "name": "Coach Ramon Torres",
+          "position": "Athletics Director",
+          "photo": "assets/images/faculty/athletics-dir.jpg"
+        },
+        "rooms": [
+          { "id": "slgym-court", "name": "Main Basketball Court", "description": "Full-size court for competitions and PE classes.", "isFaculty": false },
+          { "id": "slgym-locker", "name": "Locker Rooms", "description": "Male and female locker rooms for athletes.", "isFaculty": false },
+          { "id": "slgym-office", "name": "Athletics Office", "description": "Office for sports coordination and scheduling.", "isFaculty": true }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "mp-gym",
+    "name": "Multi-Purpose Gym",
+    "type": "gym",
+    "lat": 14.25467,
+    "lng": 121.40630,
+    "image": "assets/images/mp_gym.jpg",
+    "description": "Facility for basketball, volleyball, and physical education classes. Also used for indoor events and university assemblies.",
+    "hours": "Depends on Schedule",
+    "tags": ["gym", "sports", "PE", "volleyball"],
+    "floors": [
+      {
+        "id": "mpgym-main",
+        "name": "Main Floor",
+        "colleges": "Physical Education Department",
+        "floorPhoto": "assets/images/floors/mpgym-main.jpg",
+        "orgChart": null,
+        "faculty": null,
+        "rooms": [
+          { "id": "mpgym-court1", "name": "Court A", "description": "Basketball / badminton court.", "isFaculty": false },
+          { "id": "mpgym-court2", "name": "Court B", "description": "Volleyball court.", "isFaculty": false }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "pool-area",
+    "name": "Pool Area",
+    "type": "gym",
+    "lat": 14.25547,
+    "lng": 121.40677,
+    "image": "assets/images/pool.jpg",
+    "description": "Laguna Sports Complex swimming facility used for Physical Education swim classes and varsity swimming competitions.",
+    "hours": "6:00 AM - 5:00 PM",
+    "tags": ["pool", "swimming", "sports", "PE"],
+    "floors": [
+      {
+        "id": "pool-main",
+        "name": "Pool Deck",
+        "colleges": "Physical Education Department",
+        "floorPhoto": "assets/images/floors/pool-main.jpg",
+        "orgChart": null,
+        "faculty": {
+          "name": "Coach Liza Moreno",
+          "position": "Swimming Coach",
+          "photo": "assets/images/faculty/swim-coach.jpg"
+        },
+        "rooms": [
+          { "id": "pool-main-pool", "name": "Swimming Pool (25m)", "description": "25-meter competition pool with 6 lanes.", "isFaculty": false },
+          { "id": "pool-shower", "name": "Shower / Changing Rooms", "description": "Male and female changing facilities.", "isFaculty": false }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "new-building",
+    "name": "New Building",
+    "type": "classroom",
+    "lat": 14.25426,
+    "lng": 121.40904,
+    "image": "assets/images/new_building.jpg",
+    "description": "The newest academic building with modern classroom facilities, smart board technology, and air-conditioned rooms.",
+    "hours": "7:00 AM - 8:00 PM",
+    "tags": ["classroom", "modern", "smart board"],
+    "floors": [
+      {
+        "id": "newbldg-gf",
+        "name": "Ground Floor",
+        "colleges": "College of Engineering & Technology / College of Business",
+        "floorPhoto": "assets/images/floors/newbldg-gf.jpg",
+        "orgChart": null,
+        "faculty": null,
+        "rooms": [
+          { "id": "newbldg-gf-r1", "name": "Room 101", "description": "Smart classroom with 65-inch display, capacity 45.", "isFaculty": false },
+          { "id": "newbldg-gf-r2", "name": "Room 102", "description": "Smart classroom, capacity 45.", "isFaculty": false },
+          { "id": "newbldg-gf-r3", "name": "Room 103", "description": "Smart classroom, capacity 45.", "isFaculty": false }
+        ]
+      },
+      {
+        "id": "newbldg-2f",
+        "name": "Second Floor",
+        "colleges": "College of Engineering & Technology",
+        "floorPhoto": "assets/images/floors/newbldg-2f.jpg",
+        "orgChart": "assets/images/orgcharts/cet-org.jpg",
+        "faculty": {
+          "name": "Engr. Paolo Reyes",
+          "position": "CET Dean",
+          "photo": "assets/images/faculty/cet-dean.jpg"
+        },
+        "rooms": [
+          { "id": "newbldg-2f-r1", "name": "Room 201", "description": "Engineering classroom, capacity 45.", "isFaculty": false },
+          { "id": "newbldg-2f-r2", "name": "Room 202", "description": "Engineering classroom, capacity 45.", "isFaculty": false },
+          { "id": "newbldg-2f-faculty", "name": "CET Faculty Room", "description": "Faculty lounge and workroom for CET instructors.", "isFaculty": true }
+        ]
+      },
+      {
+        "id": "newbldg-3f",
+        "name": "Third Floor",
+        "colleges": "College of Business Administration",
+        "floorPhoto": "assets/images/floors/newbldg-3f.jpg",
+        "orgChart": "assets/images/orgcharts/cba-org.jpg",
+        "faculty": {
+          "name": "Dr. Sheila Aquino",
+          "position": "CBA Dean",
+          "photo": "assets/images/faculty/cba-dean.jpg"
+        },
+        "rooms": [
+          { "id": "newbldg-3f-r1", "name": "Room 301", "description": "Business classroom, capacity 45.", "isFaculty": false },
+          { "id": "newbldg-3f-r2", "name": "Room 302", "description": "Business classroom, capacity 45.", "isFaculty": false },
+          { "id": "newbldg-3f-faculty", "name": "CBA Faculty Room", "description": "Faculty lounge and workroom for CBA instructors.", "isFaculty": true }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "canteen",
+    "name": "Canteen",
+    "type": "canteen",
+    "lat": 14.25606,
+    "lng": 121.40594,
+    "image": "assets/images/canteen.jpg",
+    "description": "Main food court and student cafeteria area. Offers a variety of affordable meals, snacks, and beverages for students and staff.",
+    "hours": "7:00 AM - 5:00 PM",
+    "tags": ["canteen", "food", "cafeteria"],
+    "floors": [
+      {
+        "id": "canteen-gf",
+        "name": "Ground Floor",
+        "colleges": "Student Canteen Services",
+        "floorPhoto": "assets/images/floors/canteen-gf.jpg",
+        "orgChart": null,
+        "faculty": null,
+        "rooms": [
+          { "id": "canteen-stall1", "name": "Main Canteen Hall", "description": "Main dining area with multiple food stalls.", "isFaculty": false },
+          { "id": "canteen-coop", "name": "University Cooperative Store", "description": "Sells school supplies, uniforms, and snacks.", "isFaculty": false }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "me-offices",
+    "name": "M.E Offices",
+    "type": "office",
+    "lat": 14.25506,
+    "lng": 121.40684,
+    "image": "assets/images/me_building.jpg",
+    "description": "Offices for Mechanical Engineering faculty, coordinators, and department administration.",
+    "hours": "8:00 AM - 5:00 PM",
+    "tags": ["engineering", "mechanical", "ME", "faculty", "office"],
+    "floors": [
+      {
+        "id": "me-gf",
+        "name": "Ground Floor",
+        "colleges": "College of Engineering — Mechanical Engineering Department",
+        "floorPhoto": "assets/images/floors/me-gf.jpg",
+        "orgChart": "assets/images/orgcharts/me-org.jpg",
+        "faculty": {
+          "name": "Engr. Ricardo Santos",
+          "position": "ME Department Chair",
+          "photo": "assets/images/faculty/me-chair.jpg"
+        },
+        "rooms": [
+          { "id": "me-main", "name": "ME Department Office", "description": "Main department office for ME students and faculty.", "isFaculty": false },
+          { "id": "me-faculty", "name": "ME Faculty Room", "description": "Faculty workroom for ME instructors.", "isFaculty": true },
+          { "id": "me-thesis-rm", "name": "Thesis / Capstone Room", "description": "Room for ME thesis consultations and defense.", "isFaculty": false }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "science-labs",
+    "name": "Science Labs (Chem/Bio/Phys)",
+    "type": "lab",
+    "lat": 14.25510,
+    "lng": 121.40691,
+    "image": "assets/images/science_labs.jpg",
+    "description": "State-of-the-art laboratories for Chemistry, Biology, and Physics experiments. Serves engineering, health sciences, and science program students.",
+    "hours": "8:00 AM - 5:00 PM",
+    "tags": ["lab", "chemistry", "biology", "physics", "science"],
+    "floors": [
+      {
+        "id": "scilab-gf",
+        "name": "Ground Floor",
+        "colleges": "College of Engineering & College of Health Sciences",
+        "floorPhoto": "assets/images/floors/scilab-gf.jpg",
+        "orgChart": null,
+        "faculty": {
+          "name": "Prof. Danilo Flores",
+          "position": "Science Laboratory Coordinator",
+          "photo": "assets/images/faculty/scilab-coord.jpg"
+        },
+        "rooms": [
+          { "id": "scilab-chem", "name": "Chemistry Laboratory", "description": "Fully equipped chemistry lab with fume hoods and safety stations.", "isFaculty": false },
+          { "id": "scilab-bio", "name": "Biology Laboratory", "description": "Biology lab with microscopes and specimen collections.", "isFaculty": false },
+          { "id": "scilab-phys", "name": "Physics Laboratory", "description": "Physics lab with experiment equipment and measurement tools.", "isFaculty": false },
+          { "id": "scilab-prep", "name": "Lab Preparation Room", "description": "Storage and preparation room for lab materials.", "isFaculty": true }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "gate-1",
+    "name": "Gate 1",
+    "type": "gate",
+    "lat": 14.25557,
+    "lng": 121.40067,
+    "image": "assets/images/gate1.jpg",
+    "description": "The primary entrance for students and vehicles entering the campus. Security checkpoint with guard on duty 24/7.",
+    "hours": "24/7 Open",
+    "tags": ["gate", "entrance", "security"],
+    "floors": []
+  },
+  {
+    "id": "gate-2",
+    "name": "Gate 2",
+    "type": "gate",
+    "lat": 14.25626,
+    "lng": 121.40779,
+    "image": "assets/images/gate2.jpg",
+    "description": "The secondary entrance and exit point located near the sports complex. Used primarily by athletes and during large events.",
+    "hours": "24/7 Open",
+    "tags": ["gate", "entrance", "exit", "security"],
+    "floors": []
+  },
+  {
+    "id": "athletes-village",
+    "name": "Athlete's Village",
+    "type": "office",
+    "lat": 14.25490,
+    "lng": 121.40754,
+    "image": "assets/images/athlete.jpg",
+    "description": "Housing facility for Laguna University's student athletes. Provides dormitory-style accommodation for varsity players.",
+    "hours": "Resident Access Only",
+    "tags": ["dormitory", "athletes", "housing"],
+    "floors": [
+      {
+        "id": "athlete-gf",
+        "name": "Ground Floor",
+        "colleges": "Athletics Department — Student Housing",
+        "floorPhoto": "assets/images/floors/athlete-gf.jpg",
+        "orgChart": null,
+        "faculty": {
+          "name": "Ms. Gloria Natividad",
+          "position": "Dormitory Manager",
+          "photo": "assets/images/faculty/dorm-manager.jpg"
+        },
+        "rooms": [
+          { "id": "athlete-lobby", "name": "Main Lobby", "description": "Reception and common area for residents.", "isFaculty": false },
+          { "id": "athlete-office", "name": "Dorm Manager's Office", "description": "Administration office for dormitory management.", "isFaculty": true }
+        ]
+      },
+      {
+        "id": "athlete-2f",
+        "name": "Second Floor — Dormitory Rooms",
+        "colleges": "Athletics Department — Student Housing",
+        "floorPhoto": "assets/images/floors/athlete-2f.jpg",
+        "orgChart": null,
+        "faculty": null,
+        "rooms": [
+          { "id": "athlete-rm1", "name": "Male Dormitory Wing", "description": "Dormitory rooms for male student athletes.", "isFaculty": false },
+          { "id": "athlete-rm2", "name": "Female Dormitory Wing", "description": "Dormitory rooms for female student athletes.", "isFaculty": false }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "rizal-monument",
+    "name": "Jose Rizal Monument",
+    "type": "landmark",
+    "lat": 14.255775,
+    "lng": 121.40572,
+    "image": "assets/images/rizal.jpg",
+    "description": "A landmark monument dedicated to the national hero Dr. Jose Rizal, located at the center of the campus. A common meeting point and photo spot for students.",
+    "hours": "Open Area",
+    "tags": ["landmark", "monument", "open area"],
+    "floors": []
   }
 ]
