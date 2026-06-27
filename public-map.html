@@ -4,26 +4,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LU Navigator | Public Map</title>
-    
+
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    
+
     <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
-   
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/public-map.css">
-    
 </head>
 <body class="map-view">
 
-   
+    <!-- Sidebar overlay (tap-to-close) -->
     <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
     <div class="app-shell">
-        
-        <!-- SIDEBAR (CAMPUS COMPANION) -->
+
+        <!-- =============================================
+             SIDEBAR (Campus Companion)
+             ============================================= -->
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <div class="brand-group">
@@ -39,7 +39,8 @@
             </div>
 
             <div class="sidebar-content">
-                
+
+                <!-- Quick Explore -->
                 <div class="sidebar-section">
                     <span class="section-title">Quick Explore</span>
                     <div class="quick-grid">
@@ -62,7 +63,7 @@
                     </div>
                 </div>
 
-                <!-- CAMPUS EMERGENCY SECTION -->
+                <!-- Campus Emergency -->
                 <div class="sidebar-section">
                     <div class="emergency-box">
                         <span class="em-label">CAMPUS EMERGENCY</span>
@@ -75,7 +76,7 @@
                     </div>
                 </div>
 
-                <!-- ONLINE SERVICES LINKS -->
+                <!-- Online Services -->
                 <div class="sidebar-section">
                     <span class="section-title">Online Services</span>
                     <ul class="link-list">
@@ -88,17 +89,22 @@
 
             <div class="sidebar-footer">
                 <p>© 2024 Laguna University Navigator</p>
-                <small>v1.0.2 • Designed for LUnians</small>
+                <small>v2.0.0 • Designed for LUnians</small>
             </div>
         </aside>
 
-        <!-- MAIN CONTENT AREA -->
+        <!-- =============================================
+             MAIN CONTENT (Map + Overlays)
+             ============================================= -->
         <main class="main-content">
-            
-            
+
+            <!-- THE MAP -->
+            <div id="map"></div>
+
+            <!-- ROOM DETAIL CARD (slides up from bottom) -->
             <div class="room-card" id="room-card">
                 <div class="card-image-section">
-                    <button class="close-card-btn" id="close-card" title="Dismiss Card">✕</button>
+                    <button class="close-card-btn" id="close-card" title="Dismiss">✕</button>
                     <img id="card-img" src="assets/images/placeholder.jpg" alt="Room Photo">
                 </div>
                 <div class="card-details">
@@ -113,34 +119,34 @@
                 </div>
             </div>
 
-            <!-- TOP SEARCH & FILTERS -->
+            <!-- SEARCH + FILTER (floating top bar) -->
             <div class="floating-search-container">
                 <div class="search-card">
-                    <button class="burger-menu-btn" id="burger-btn" title="Open Sidebar">
+                    <button class="burger-menu-btn" id="burger-btn" title="Open Menu">
                         <span></span><span></span><span></span>
                     </button>
-                    <input type="text" id="map-search" placeholder="Search room, office, lab...">
-                    <button class="search-btn">🔍</button>
+                    <input type="text" id="map-search" placeholder="Search room, office, lab..." autocomplete="off">
+                    <button class="search-btn" title="Search">🔍</button>
                 </div>
-                
+                <!-- Autocomplete dropdown injected here by JS -->
+
                 <div class="filter-row">
                     <button class="f-pill active" onclick="filterMarkers('all')">All</button>
                     <button class="f-pill" onclick="filterMarkers('office')">Offices</button>
                     <button class="f-pill" onclick="filterMarkers('lab')">Labs</button>
+                    <button class="f-pill" onclick="filterMarkers('classroom')">Classrooms</button>
                     <button class="f-pill" onclick="filterMarkers('canteen')">Canteen</button>
+                    <button class="f-pill" onclick="filterMarkers('gate')">Gates</button>
                 </div>
             </div>
 
-            <!-- THE MAP -->
-            <div id="map"></div>
-
-            <!-- MAP CONTROL BUTTONS (Bottom Right) -->
+            <!-- MAP FABs (bottom right) -->
             <div class="floating-actions">
-                <button class="map-fab" id="btn-locate" title="Find My Location">🎯</button>
-                <button class="map-fab" id="btn-reset" title="Reset Map View">🏠</button>
+                <button class="map-fab" id="btn-locate" title="My Location">🎯</button>
+                <button class="map-fab" id="btn-reset" title="Reset View">🏠</button>
             </div>
 
-            <!-- NAVIGATION TOAST (Navigation pill at the bottom) -->
+            <!-- OLD DISTANCE TOAST — fallback (hidden when nav-panel is active) -->
             <div id="distance-toast" class="toast hidden">
                 <div class="toast-body">
                     <span id="target-name">Navigating to...</span>
@@ -148,37 +154,36 @@
                 </div>
             </div>
 
+            <!-- TURN-BY-TURN NAV PANEL injected by JS (public-map.js → injectNavPanel) -->
+
         </main>
     </div>
 
     <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    
-    <!-- Logic Scripts -->
-    <script type="module" src="js/pages/public-map.js"></script>
-    
-    <script>
-        // UI INTERACTION LOGIC
-        document.addEventListener('DOMContentLoaded', () => {
-            const burgerBtn = document.getElementById('burger-btn');
-            const closeSidebar = document.getElementById('close-sidebar');
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('sidebar-overlay');
-            const closeCard = document.getElementById('close-card');
 
-            // Toggle Sidebar
+    <!-- Map logic -->
+    <script type="module" src="js/pages/public-map.js"></script>
+
+    <!-- UI interaction (sidebar, card close) -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const burgerBtn   = document.getElementById('burger-btn');
+            const closeSidebar = document.getElementById('close-sidebar');
+            const sidebar     = document.getElementById('sidebar');
+            const overlay     = document.getElementById('sidebar-overlay');
+            const closeCard   = document.getElementById('close-card');
+
             burgerBtn.addEventListener('click', () => {
                 sidebar.classList.add('active');
                 overlay.classList.add('active');
             });
 
-            // Close Sidebar (X or Overlay Click)
             [closeSidebar, overlay].forEach(el => el.addEventListener('click', () => {
                 sidebar.classList.remove('active');
                 overlay.classList.remove('active');
             }));
 
-            // Close Room Detail Card
             closeCard.addEventListener('click', () => {
                 document.getElementById('room-card').classList.remove('active');
             });
