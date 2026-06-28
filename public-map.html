@@ -40,6 +40,18 @@
 
             <div class="sidebar-content">
 
+                <!-- Recently Viewed -->
+                <div class="sidebar-section" id="recent-section" style="display:none">
+                    <span class="section-title">Recently Viewed</span>
+                    <ul class="recent-list" id="recent-list"></ul>
+                </div>
+
+                <!-- Favorites -->
+                <div class="sidebar-section" id="favs-section" style="display:none">
+                    <span class="section-title">❤️ Saved Places</span>
+                    <ul class="recent-list" id="favs-list"></ul>
+                </div>
+
                 <!-- Quick Explore -->
                 <div class="sidebar-section">
                     <span class="section-title">Quick Explore</span>
@@ -119,24 +131,29 @@
                 </div>
             </div>
 
-            <!-- SEARCH + FILTER (floating top bar) -->
+            <!-- SEARCH (floating top bar) -->
             <div class="floating-search-container">
                 <div class="search-card">
                     <button class="burger-menu-btn" id="burger-btn" title="Open Menu">
                         <span></span><span></span><span></span>
                     </button>
-                    <input type="text" id="map-search" placeholder="Search room, office, lab..." autocomplete="off">
+                    <input type="text" id="map-search" placeholder="Search room, office, lab..." autocomplete="off" maxlength="200">
                     <button class="search-btn" title="Search">🔍</button>
                 </div>
                 <!-- Autocomplete dropdown injected here by JS -->
+            </div>
 
+            <!-- FILTER PILLS (separate from search container) -->
+            <div class="filter-row-wrapper">
                 <div class="filter-row">
-                    <button class="f-pill active" onclick="filterMarkers('all')">All</button>
-                    <button class="f-pill" onclick="filterMarkers('office')">Offices</button>
-                    <button class="f-pill" onclick="filterMarkers('lab')">Labs</button>
-                    <button class="f-pill" onclick="filterMarkers('classroom')">Classrooms</button>
-                    <button class="f-pill" onclick="filterMarkers('canteen')">Canteen</button>
-                    <button class="f-pill" onclick="filterMarkers('gate')">Gates</button>
+                    <button class="f-pill active" data-filter="all"       onclick="filterMarkers('all', this)">All</button>
+                    <button class="f-pill"         data-filter="office"    onclick="filterMarkers('office', this)">🏢 Offices</button>
+                    <button class="f-pill"         data-filter="lab"       onclick="filterMarkers('lab', this)">🔬 Labs</button>
+                    <button class="f-pill"         data-filter="classroom" onclick="filterMarkers('classroom', this)">📚 Rooms</button>
+                    <button class="f-pill"         data-filter="canteen"   onclick="filterMarkers('canteen', this)">🍴 Canteen</button>
+                    <button class="f-pill"         data-filter="gym"       onclick="filterMarkers('gym', this)">🏋️ Gym</button>
+                    <button class="f-pill"         data-filter="gate"      onclick="filterMarkers('gate', this)">🚪 Gates</button>
+                    <button class="f-pill"         data-filter="landmark"  onclick="filterMarkers('landmark', this)">🗿 Landmarks</button>
                 </div>
             </div>
 
@@ -154,6 +171,23 @@
                 </div>
             </div>
 
+            <!-- MAP LEGEND (bottom left) -->
+            <div class="map-legend" id="map-legend">
+                <div class="legend-header" onclick="toggleLegend()">
+                    <span class="legend-title">📍 Legend</span>
+                    <span class="legend-toggle-icon" id="legend-icon">▾</span>
+                </div>
+                <div class="legend-body" id="legend-body">
+                    <div class="legend-item"><span class="legend-dot" style="background:#064e3b"></span> Office</div>
+                    <div class="legend-item"><span class="legend-dot" style="background:#1d4ed8"></span> Classroom</div>
+                    <div class="legend-item"><span class="legend-dot" style="background:#7c3aed"></span> Laboratory</div>
+                    <div class="legend-item"><span class="legend-dot" style="background:#b45309"></span> Gym / Sports</div>
+                    <div class="legend-item"><span class="legend-dot" style="background:#be185d"></span> Canteen</div>
+                    <div class="legend-item"><span class="legend-dot" style="background:#0f766e"></span> Gate</div>
+                    <div class="legend-item"><span class="legend-dot" style="background:#78716c"></span> Landmark</div>
+                </div>
+            </div>
+
             <!-- TURN-BY-TURN NAV PANEL injected by JS (public-map.js → injectNavPanel) -->
 
         </main>
@@ -168,26 +202,81 @@
     <!-- UI interaction (sidebar, card close) -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const burgerBtn   = document.getElementById('burger-btn');
+            const burgerBtn    = document.getElementById('burger-btn');
             const closeSidebar = document.getElementById('close-sidebar');
-            const sidebar     = document.getElementById('sidebar');
-            const overlay     = document.getElementById('sidebar-overlay');
-            const closeCard   = document.getElementById('close-card');
+            const sidebar      = document.getElementById('sidebar');
+            const overlay      = document.getElementById('sidebar-overlay');
 
             burgerBtn.addEventListener('click', () => {
                 sidebar.classList.add('active');
                 overlay.classList.add('active');
+                renderSidebarLists(); // refresh on open
             });
 
             [closeSidebar, overlay].forEach(el => el.addEventListener('click', () => {
                 sidebar.classList.remove('active');
                 overlay.classList.remove('active');
             }));
-
-            closeCard.addEventListener('click', () => {
-                document.getElementById('room-card').classList.remove('active');
-            });
         });
+
+        // ── Legend toggle ──────────────────────────────────────
+        function toggleLegend() {
+            const body = document.getElementById('legend-body');
+            const icon = document.getElementById('legend-icon');
+            const open = body.classList.toggle('open');
+            icon.textContent = open ? '▴' : '▾';
+        }
+
+        // ── Sidebar: Recently Viewed + Favorites ───────────────
+        function renderSidebarLists() {
+            // Recently Viewed
+            try {
+                const recent = JSON.parse(localStorage.getItem('lu-recent') || '[]');
+                const sec    = document.getElementById('recent-section');
+                const list   = document.getElementById('recent-list');
+                if (recent.length > 0) {
+                    sec.style.display = '';
+                    list.innerHTML = recent.map(r => `
+                        <li class="recent-item" onclick="flyToRecent(${r.lat}, ${r.lng}, '${(r.name||'').replace(/'/g,"\\'")}')">
+                            <span class="recent-icon">${typeIcon(r.type)}</span>
+                            <span class="recent-name">${r.name}</span>
+                        </li>`).join('');
+                } else {
+                    sec.style.display = 'none';
+                }
+            } catch {}
+
+            // Favorites
+            try {
+                const favIds = JSON.parse(localStorage.getItem('lu-favorites') || '[]');
+                const favSec = document.getElementById('favs-section');
+                const favList= document.getElementById('favs-list');
+                if (favIds.length > 0 && window._allBuildings) {
+                    const favBuildings = window._allBuildings.filter(b => favIds.includes(b.id || b.name));
+                    if (favBuildings.length > 0) {
+                        favSec.style.display = '';
+                        favList.innerHTML = favBuildings.map(b => `
+                            <li class="recent-item" onclick="flyToRecent(${b.lat}, ${b.lng}, '${(b.name||'').replace(/'/g,"\\'")}')">
+                                <span class="recent-icon">${typeIcon(b.type)}</span>
+                                <span class="recent-name">${b.name}</span>
+                            </li>`).join('');
+                    } else { favSec.style.display = 'none'; }
+                } else { favSec.style.display = 'none'; }
+            } catch {}
+        }
+
+        function typeIcon(type) {
+            return { office:'🏢', lab:'🔬', classroom:'📚', gym:'🏋️', canteen:'🍴', gate:'🚪', landmark:'🗿' }[type] || '📍';
+        }
+
+        function flyToRecent(lat, lng, name) {
+            if (window._mapInstance) {
+                window._mapInstance.flyTo([lat, lng], 18, { animate: true, duration: 1.2 });
+            }
+            // Close sidebar
+            document.getElementById('sidebar').classList.remove('active');
+            document.getElementById('sidebar-overlay').classList.remove('active');
+        }
     </script>
 </body>
 </html>

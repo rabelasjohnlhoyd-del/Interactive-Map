@@ -120,17 +120,20 @@ async function initMap() {
     }).addTo(map);
 
     markersLayer.addTo(map);
-    L.control.zoom({ position: 'bottomright' }).addTo(map);
+    L.control.zoom({ position: 'bottomleft' }).addTo(map);
 
     try {
         const res = await fetch('js/data/buildings.json');
         allLocations = await res.json();
+        window._allBuildings = allLocations; // expose for sidebar favorites
         renderMarkers('all');
         buildAutocompleteData();
     } catch (err) {
         console.error('Error loading buildings.json:', err);
         showWarning('⚠️ Could not load campus data. Please refresh.');
     }
+
+    window._mapInstance = map; // expose for flyToRecent()
 
     injectNavPanel();
     setupEventListeners();
@@ -141,16 +144,26 @@ async function initMap() {
 //  MARKER STYLES
 // ============================================================
 const TYPE_STYLE = {
-    office:    { color: '#1A5C38', emoji: '🏢' },
-    classroom: { color: '#2563EB', emoji: '📚' },
-    lab:       { color: '#7C3AED', emoji: '🔬' },
-    gym:       { color: '#D97706', emoji: '🏀' },
-    gate:      { color: '#DC2626', emoji: '🚪' },
-    canteen:   { color: '#059669', emoji: '🍴' },
+    office:    { color: '#064e3b', emoji: '🏢' },
+    classroom: { color: '#1d4ed8', emoji: '📚' },
+    lab:       { color: '#7c3aed', emoji: '🔬' },
+    gym:       { color: '#b45309', emoji: '🏋️' },
+    gate:      { color: '#0f766e', emoji: '🚪' },
+    canteen:   { color: '#be185d', emoji: '🍴' },
+    landmark:  { color: '#78716c', emoji: '🗿' },
 };
 
-function makeIcon(type) {
-    const s = TYPE_STYLE[type] || { color: '#1A5C38', emoji: '📍' };
+function makeIcon(type, name) {
+    let s = { ...(TYPE_STYLE[type] || { color: '#78716c', emoji: '📍' }) };
+
+    // Name-based emoji overrides
+    if (name) {
+        const n = name.toLowerCase();
+        if (n.includes('pool'))             s.emoji = '🏊';
+        else if (n.includes('san luis'))    s.emoji = '🏀';
+        else if (n.includes('multi'))       s.emoji = '🏐';
+    }
+
     return L.divIcon({
         className: '',
         html: `<div style="width:36px;height:36px;background:${s.color};border:3px solid white;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 2px 8px rgba(0,0,0,0.3);"><div style="transform:rotate(45deg);width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:13px;padding-bottom:4px;">${s.emoji}</div></div>`,
@@ -170,7 +183,7 @@ function renderMarkers(category) {
         : allLocations.filter(loc => loc.type === category);
 
     filtered.forEach(loc => {
-        const marker = L.marker([loc.lat, loc.lng], { icon: makeIcon(loc.type) });
+        const marker = L.marker([loc.lat, loc.lng], { icon: makeIcon(loc.type, loc.name) });
         marker.bindTooltip(loc.name, { permanent: false, direction: 'top', offset: [0, -38] });
         marker.on('click', () => handleLocationSelect(loc));
         markersLayer.addLayer(marker);
@@ -201,46 +214,262 @@ window.handleQuickExplore = function(category) {
 };
 
 // ============================================================
-//  LOCATION SELECT (Room Card)
+//  OPEN / CLOSED STATUS HELPER
+// ============================================================
+function getOpenStatus(hoursStr) {
+    if (!hoursStr) return null;
+    const h = hoursStr.toLowerCase();
+    if (h.includes('24/7') || h.includes('open area') || h.includes('resident')) {
+        return { open: true, label: hoursStr };
+    }
+    if (h.includes('depends')) {
+        return { open: null, label: 'Schedule Varies' };
+    }
+
+    const now     = new Date();
+    const nowMins = now.getHours() * 60 + now.getMinutes();
+
+    // Parse "8:00 AM - 5:00 PM" style strings
+    const match = hoursStr.match(/(\d+):(\d+)\s*(AM|PM)\s*[-–]\s*(\d+):(\d+)\s*(AM|PM)/i);
+    if (!match) return null;
+
+    let [, sh, sm, sap, eh, em, eap] = match;
+    sh = parseInt(sh); sm = parseInt(sm); eh = parseInt(eh); em = parseInt(em);
+    if (sap.toUpperCase() === 'PM' && sh !== 12) sh += 12;
+    if (sap.toUpperCase() === 'AM' && sh === 12) sh = 0;
+    if (eap.toUpperCase() === 'PM' && eh !== 12) eh += 12;
+    if (eap.toUpperCase() === 'AM' && eh === 12) eh = 0;
+
+    const openMins  = sh * 60 + sm;
+    const closeMins = eh * 60 + em;
+    const isOpen    = nowMins >= openMins && nowMins < closeMins;
+
+    return { open: isOpen, label: hoursStr };
+}
+
+// ============================================================
+//  FAVORITES (LocalStorage)
+// ============================================================
+function getFavorites() {
+    try { return JSON.parse(localStorage.getItem('lu-favorites') || '[]'); }
+    catch { return []; }
+}
+
+function toggleFavorite(id) {
+    let favs = getFavorites();
+    const idx = favs.indexOf(id);
+    if (idx > -1) favs.splice(idx, 1);
+    else favs.push(id);
+    localStorage.setItem('lu-favorites', JSON.stringify(favs));
+    return idx === -1; // true = now favorited
+}
+
+function isFavorite(id) {
+    return getFavorites().includes(id);
+}
+
+// ============================================================
+//  RECENTLY VIEWED (LocalStorage)
+// ============================================================
+function addRecentlyViewed(loc) {
+    try {
+        let recent = JSON.parse(localStorage.getItem('lu-recent') || '[]');
+        recent = recent.filter(r => r.id !== loc.id);
+        recent.unshift({ id: loc.id, name: loc.name, type: loc.type, lat: loc.lat, lng: loc.lng });
+        if (recent.length > 5) recent = recent.slice(0, 5);
+        localStorage.setItem('lu-recent', JSON.stringify(recent));
+    } catch {}
+}
+
+// ============================================================
+//  FLOORS ACCORDION HTML BUILDER
+// ============================================================
+function buildFloorsHTML(floors) {
+    if (!floors || floors.length === 0) {
+        return `<div class="card-no-floors">No floor information available.</div>`;
+    }
+
+    return floors.map((floor, idx) => {
+        const facultyHTML = floor.faculty ? `
+            <div class="card-faculty">
+                <div class="card-faculty-avatar">
+                    ${floor.faculty.photo
+                        ? `<img src="${floor.faculty.photo}" alt="${floor.faculty.name}" onerror="this.parentNode.innerHTML='${floor.faculty.name.charAt(0)}'"/>`
+                        : floor.faculty.name.charAt(0)
+                    }
+                </div>
+                <div class="card-faculty-info">
+                    <span class="card-faculty-name">${floor.faculty.name}</span>
+                    <span class="card-faculty-pos">${floor.faculty.position || ''}</span>
+                </div>
+            </div>` : '';
+
+        const roomsHTML = (floor.rooms && floor.rooms.length) ? `
+            <div class="card-rooms-list">
+                ${floor.rooms.map(r => `
+                    <div class="card-room-item ${r.isFaculty ? 'is-faculty' : ''}">
+                        <span class="card-room-icon">${r.isFaculty ? '👨‍🏫' : '🚪'}</span>
+                        <div class="card-room-body">
+                            <span class="card-room-name">${r.name}</span>
+                            ${r.description ? `<span class="card-room-desc">${r.description}</span>` : ''}
+                        </div>
+                        ${r.isFaculty ? '<span class="card-room-badge">Faculty</span>' : ''}
+                    </div>`).join('')}
+            </div>` : '';
+
+        const collegesHTML = floor.colleges
+            ? `<div class="card-floor-college">${floor.colleges}</div>` : '';
+
+        return `
+            <div class="card-floor-item ${idx === 0 ? 'open' : ''}">
+                <div class="card-floor-header" onclick="toggleCardFloor(this)">
+                    <div class="card-floor-header-left">
+                        <span class="card-floor-icon">🏢</span>
+                        <span class="card-floor-name">${floor.name}</span>
+                    </div>
+                    <span class="card-floor-chevron">›</span>
+                </div>
+                <div class="card-floor-body">
+                    ${collegesHTML}
+                    ${facultyHTML}
+                    ${roomsHTML}
+                </div>
+            </div>`;
+    }).join('');
+}
+
+window.toggleCardFloor = function(headerEl) {
+    const item = headerEl.parentElement;
+    const isOpen = item.classList.contains('open');
+    // Close all siblings
+    item.parentElement.querySelectorAll('.card-floor-item').forEach(el => el.classList.remove('open'));
+    if (!isOpen) item.classList.add('open');
+};
+
+// ============================================================
+//  CARD TAB SWITCHER
+// ============================================================
+window.switchCardTab = function(btn, tabId) {
+    const card = btn.closest('.room-card');
+    card.querySelectorAll('.card-tab-btn').forEach(b => b.classList.remove('active'));
+    card.querySelectorAll('.card-tab-pane').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    card.querySelector(`#${tabId}`)?.classList.add('active');
+};
+
+// ============================================================
+//  LOCATION SELECT (Room Card) — Enhanced
 // ============================================================
 function handleLocationSelect(loc) {
     if (!loc) return;
 
+    // Track recently viewed
+    addRecentlyViewed(loc);
+
     map.flyTo([loc.lat - 0.0005, loc.lng], 18, { animate: true, duration: 1.5 });
 
-    document.getElementById('card-title').innerText = loc.name;
-    document.getElementById('card-tag').innerText   = loc.type || 'Location';
-    document.getElementById('card-desc').innerText  = loc.description || 'No description available.';
+    const card       = document.getElementById('room-card');
+    const typeLabel  = { office: 'Office', classroom: 'Classroom', lab: 'Laboratory', gym: 'Gym / Sports', gate: 'Gate', canteen: 'Canteen', landmark: 'Landmark' }[loc.type] || loc.type || 'Location';
+    const status     = getOpenStatus(loc.hours);
+    const favored    = isFavorite(loc.id || loc.name);
+    const hasFloors  = loc.floors && loc.floors.length > 0;
 
-    const imgEl      = document.getElementById('card-img');
-    const imgSection = document.querySelector('.card-image-section');
-
-    if (loc.image && loc.image.trim() !== '') {
-        imgEl.src = loc.image;
-        imgSection.style.display = 'block';
-        imgEl.onerror = () => { imgSection.style.display = 'none'; };
-    } else {
-        imgSection.style.display = 'none';
+    // Build status badge
+    let statusBadge = '';
+    if (status) {
+        if (status.open === true)  statusBadge = `<span class="card-status open">● Open Now</span>`;
+        else if (status.open === false) statusBadge = `<span class="card-status closed">● Closed</span>`;
+        else statusBadge = `<span class="card-status varies">● ${status.label}</span>`;
     }
 
-    const card = document.getElementById('room-card');
-    card.classList.add('active');
+    // Build image section
+    const imgHTML = (loc.image && loc.image.trim())
+        ? `<img id="card-img" src="${loc.image}" alt="${loc.name}" onerror="this.parentNode.style.display='none'">`
+        : '';
 
-    document.getElementById('card-nav-btn').onclick = () => {
-        startNavigation(loc.lat, loc.lng, loc.name);
-        card.classList.remove('active');
-    };
+    // Tabs — only show Floors tab if building has floor data
+    const floorsTab = hasFloors
+        ? `<button class="card-tab-btn" onclick="switchCardTab(this, 'card-tab-floors')">🏢 Floors</button>` : '';
+    const floorsPane = hasFloors
+        ? `<div class="card-tab-pane" id="card-tab-floors">${buildFloorsHTML(loc.floors)}</div>` : '';
+
+    card.innerHTML = `
+        <div class="card-image-section" ${!loc.image ? 'style="display:none"' : ''}>
+            <button class="close-card-btn" onclick="document.getElementById('room-card').classList.remove('active')" title="Dismiss">✕</button>
+            <button class="card-fav-btn ${favored ? 'active' : ''}" id="card-fav-btn" onclick="handleFavBtn(this, '${(loc.id || loc.name).replace(/'/g, "\\'")}', '${loc.name.replace(/'/g, "\\'")}')">
+                ${favored ? '❤️' : '🤍'}
+            </button>
+            ${imgHTML}
+        </div>
+
+        ${!loc.image ? `
+        <div style="position:relative">
+            <button class="close-card-btn" style="position:absolute;top:10px;right:10px;z-index:2;" onclick="document.getElementById('room-card').classList.remove('active')">✕</button>
+            <button class="card-fav-btn ${favored ? 'active' : ''}" style="position:absolute;top:10px;right:50px;z-index:2;" id="card-fav-btn" onclick="handleFavBtn(this, '${(loc.id || loc.name).replace(/'/g, "\\'")}', '${loc.name.replace(/'/g, "\\'")}')">
+                ${favored ? '❤️' : '🤍'}
+            </button>
+        </div>` : ''}
+
+        <div class="card-details">
+            <div class="card-details-top">
+                <h2 id="card-title">${loc.name}</h2>
+                <div class="card-meta-row">
+                    <span id="card-tag" class="room-tag">${typeLabel}</span>
+                    ${statusBadge}
+                </div>
+                ${loc.hours ? `<div class="card-hours">🕒 ${loc.hours}</div>` : ''}
+            </div>
+
+            <div class="card-tabs">
+                <button class="card-tab-btn active" onclick="switchCardTab(this, 'card-tab-info')">ℹ️ Info</button>
+                ${floorsTab}
+            </div>
+
+            <div class="card-tab-content">
+                <div class="card-tab-pane active" id="card-tab-info">
+                    <p id="card-desc">${loc.description || 'No description available.'}</p>
+                    ${loc.tags && loc.tags.length ? `
+                    <div class="card-tags-row">
+                        ${loc.tags.map(t => `<span class="card-chip">${t}</span>`).join('')}
+                    </div>` : ''}
+                </div>
+                ${floorsPane}
+            </div>
+
+            <div class="card-actions">
+                <button class="nav-btn" id="card-nav-btn" onclick="startNavigation(${loc.lat}, ${loc.lng}, '${loc.name.replace(/'/g, "\\'")}'); document.getElementById('room-card').classList.remove('active');">
+                    <span>🚶</span> Get Directions
+                </button>
+            </div>
+        </div>`;
+
+    // Remove active first to reset position, then add after content is set
+    card.classList.remove('active');
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            card.classList.add('active');
+        });
+    });
 }
+
+// ============================================================
+//  FAVORITE BUTTON HANDLER
+// ============================================================
+window.handleFavBtn = function(btn, id, name) {
+    const nowFav = toggleFavorite(id);
+    btn.textContent = nowFav ? '❤️' : '🤍';
+    btn.classList.toggle('active', nowFav);
+    showWarning(nowFav ? `❤️ "${name}" saved to Favorites!` : `💔 "${name}" removed from Favorites.`);
+};
 
 // ============================================================
 //  FILTER PILLS
 // ============================================================
-window.filterMarkers = function(category) {
+window.filterMarkers = function(category, clickedBtn) {
     renderMarkers(category);
     document.getElementById('room-card').classList.remove('active');
-    document.querySelectorAll('.f-pill').forEach(btn => {
-        btn.classList.toggle('active', btn.getAttribute('onclick').includes(category));
-    });
+    document.querySelectorAll('.f-pill').forEach(btn => btn.classList.remove('active'));
+    if (clickedBtn) clickedBtn.classList.add('active');
 };
 
 // ============================================================
@@ -729,7 +958,7 @@ function setupAutocomplete(input) {
         // Also filter markers on map
         markersLayer.clearLayers();
         matches.forEach(({ loc }) => {
-            const marker = L.marker([loc.lat, loc.lng], { icon: makeIcon(loc.type) });
+            const marker = L.marker([loc.lat, loc.lng], { icon: makeIcon(loc.type, loc.name) });
             marker.bindTooltip(loc.name, { permanent: false, direction: 'top', offset: [0, -38] });
             marker.on('click', () => handleLocationSelect(loc));
             markersLayer.addLayer(marker);
@@ -820,4 +1049,12 @@ function showWarning(msg) {
 // ============================================================
 //  BOOT
 // ============================================================
+
+// Expose functions used by dynamically generated HTML onclick attributes
+// (required because this file runs as a module — inline onclick can't see module scope)
+window.startNavigation  = startNavigation;
+window.stopNavigation   = stopNavigation;
+window.showNavPanel     = showNavPanel;
+window.hideNavPanel     = hideNavPanel;
+
 initMap();
