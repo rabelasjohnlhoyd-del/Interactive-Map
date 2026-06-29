@@ -36,7 +36,17 @@ html, body {
   position: absolute;
   inset: 0;
   z-index: 1;
-  background: #e8eaed;
+  background: #d6d6d6;  /* neutral grey so tile load doesn't flash white */
+}
+
+/* Smooth filter transitions on the tile pane */
+.leaflet-tile-pane {
+  transition: filter 0.3s ease, opacity 0.2s ease;
+}
+
+/* Tiles fade in instead of popping in */
+.leaflet-tile {
+  transition: opacity 0.15s ease !important;
 }
 
 /* ── Leaflet Zoom Controls — Google Style ─────────── */

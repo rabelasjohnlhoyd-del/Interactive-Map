@@ -208,22 +208,55 @@ function speak(text) {
 }
 
 function applyTheme(dark) {
-    isDarkMode=dark;
-    document.documentElement.setAttribute('data-theme',dark?'dark':'light');
-    localStorage.setItem('lu-theme',dark?'dark':'light');
-    if (tileLayer) map.removeLayer(tileLayer);
-    const cfg=dark?TILES.dark:TILES.light;
-    tileLayer=L.tileLayer(cfg.url,{attribution:'© OpenStreetMap contributors © CARTO',subdomains:'abcd',maxZoom:19}).addTo(map);
-    tileLayer.setZIndex(0);
-    map.getPane('tilePane').style.filter=cfg.filter;
-    const btn=document.getElementById('theme-toggle-btn');
+    isDarkMode = dark;
+    document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+    localStorage.setItem('lu-theme', dark ? 'dark' : 'light');
+
+    const cfg = dark ? TILES.dark : TILES.light;
+    const pane = map.getPane('tilePane');
+
+    // Load new tile layer underneath, then crossfade
+    const newLayer = L.tileLayer(cfg.url, {
+        attribution: '© OpenStreetMap contributors © CARTO',
+        subdomains: 'abcd',
+        maxZoom: 19,
+        opacity: 0,
+    }).addTo(map);
+    newLayer.setZIndex(0);
+
+    // Once enough tiles are ready, fade old out / new in
+    const doSwap = () => {
+        if (tileLayer) {
+            const oldLayer = tileLayer;
+            let op = 1;
+            const fadeOut = setInterval(() => {
+                op = Math.max(0, op - 0.15);
+                oldLayer.setOpacity(op);
+                if (op <= 0) { clearInterval(fadeOut); map.removeLayer(oldLayer); }
+            }, 16);
+        }
+        let op2 = 0;
+        const fadeIn = setInterval(() => {
+            op2 = Math.min(1, op2 + 0.15);
+            newLayer.setOpacity(op2);
+            if (op2 >= 1) clearInterval(fadeIn);
+        }, 16);
+        tileLayer = newLayer;
+        pane.style.filter = cfg.filter;
+    };
+
+    newLayer.once('load', doSwap);
+    // Fallback: swap anyway after 600ms if tiles are slow
+    setTimeout(() => { if (tileLayer !== newLayer) doSwap(); }, 600);
+
+    const btn = document.getElementById('theme-toggle-btn');
     if (btn) {
-        btn.innerHTML=dark
-            ?`<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"/></svg> Light Mode`
-            :`<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1zM5.99 4.58a.996.996 0 0 0-1.41 0 .996.996 0 0 0 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41L5.99 4.58zm12.37 12.37a.996.996 0 0 0-1.41 0 .996.996 0 0 0 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0a.996.996 0 0 0 0-1.41l-1.06-1.06zm1.06-12.37l-1.06 1.06a.996.996 0 0 0 0 1.41c.39.39 1.03.39 1.41 0l1.06-1.06a.996.996 0 0 0 0-1.41.996.996 0 0 0-1.41 0zM7.05 18.36l-1.06 1.06a.996.996 0 0 0 0 1.41c.39.39 1.03.39 1.41 0l1.06-1.06a.996.996 0 0 0 0-1.41.996.996 0 0 0-1.41 0z"/></svg> Dark Mode`;
+        btn.innerHTML = dark
+            ? `<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"/></svg> Light Mode`
+            : `<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1zM5.99 4.58a.996.996 0 0 0-1.41 0 .996.996 0 0 0 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41L5.99 4.58zm12.37 12.37a.996.996 0 0 0-1.41 0 .996.996 0 0 0 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0a.996.996 0 0 0 0-1.41l-1.06-1.06zm1.06-12.37l-1.06 1.06a.996.996 0 0 0 0 1.41c.39.39 1.03.39 1.41 0l1.06-1.06a.996.996 0 0 0 0-1.41.996.996 0 0 0-1.41 0zM7.05 18.36l-1.06 1.06a.996.996 0 0 0 0 1.41c.39.39 1.03.39 1.41 0l1.06-1.06a.996.996 0 0 0 0-1.41.996.996 0 0 0-1.41 0z"/></svg> Dark Mode`;
     }
-    const activePill=document.querySelector('.f-pill.active');
-    renderMarkers(activePill?activePill.dataset.filter:'all');
+    const activePill = document.querySelector('.f-pill.active');
+    renderMarkers(activePill ? activePill.dataset.filter : 'all');
 }
 window.toggleTheme=function(){applyTheme(!isDarkMode);};
 
