@@ -2,40 +2,42 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LU Navigator | Public Map</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>LU Navigator | Campus Map</title>
 
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
-    <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Google Fonts (Roboto + Google Sans) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/public-map.css">
 </head>
 <body class="map-view">
 
-    <!-- Sidebar overlay (tap-to-close) -->
+    <!-- Sidebar overlay -->
     <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
     <div class="app-shell">
 
-        <!-- =============================================
-             SIDEBAR (Campus Companion)
-             ============================================= -->
+        <!-- ==========================================
+             SIDEBAR — Google Maps drawer
+             ========================================== -->
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <div class="brand-group">
                     <div class="logo-box">
-                        <img src="assets/images/lu-logo.png" alt="LU Logo">
+                        <img src="assets/images/lu-logo.png" alt="LU Logo" onerror="this.style.display='none'">
                     </div>
                     <div class="brand-text">
-                        <span class="main-name">LU NAVIGATOR</span>
-                        <span class="sub-name">CAMPUS COMPANION</span>
+                        <span class="main-name">LU Navigator</span>
+                        <span class="sub-name">Laguna University</span>
                     </div>
                 </div>
-                <button class="close-sidebar" id="close-sidebar" title="Close Menu">✕</button>
+                <button class="close-sidebar" id="close-sidebar" title="Close" aria-label="Close menu">✕</button>
             </div>
 
             <div class="sidebar-content">
@@ -48,42 +50,20 @@
 
                 <!-- Favorites -->
                 <div class="sidebar-section" id="favs-section" style="display:none">
-                    <span class="section-title">❤️ Saved Places</span>
+                    <span class="section-title">Saved Places</span>
                     <ul class="recent-list" id="favs-list"></ul>
-                </div>
-
-                <!-- Quick Explore -->
-                <div class="sidebar-section">
-                    <span class="section-title">Quick Explore</span>
-                    <div class="quick-grid">
-                        <div class="quick-item" onclick="handleQuickExplore('office')">
-                            <span class="q-icon">🏢</span>
-                            <span class="q-text">Offices</span>
-                        </div>
-                        <div class="quick-item" onclick="handleQuickExplore('lab')">
-                            <span class="q-icon">🔬</span>
-                            <span class="q-text">Labs</span>
-                        </div>
-                        <div class="quick-item" onclick="handleQuickExplore('canteen')">
-                            <span class="q-icon">🍴</span>
-                            <span class="q-text">Canteen</span>
-                        </div>
-                        <div class="quick-item" onclick="handleQuickExplore('gate')">
-                            <span class="q-icon">🚪</span>
-                            <span class="q-text">Gates</span>
-                        </div>
-                    </div>
                 </div>
 
                 <!-- Campus Emergency -->
                 <div class="sidebar-section">
+                    <span class="section-title">Campus Emergency</span>
                     <div class="emergency-box">
-                        <span class="em-label">CAMPUS EMERGENCY</span>
+                        <span class="em-label">⚠️ Emergency Contacts</span>
                         <div class="emergency-item">
-                            <span>Clinic:</span><strong>Local 123</strong>
+                            <span>Clinic</span><strong>Local 123</strong>
                         </div>
                         <div class="emergency-item">
-                            <span>Security:</span><strong>(049) 501-XXXX</strong>
+                            <span>Security</span><strong>(049) 501-XXXX</strong>
                         </div>
                     </div>
                 </div>
@@ -92,58 +72,53 @@
                 <div class="sidebar-section">
                     <span class="section-title">Online Services</span>
                     <ul class="link-list">
-                        <li><a href="https://portal.lu.edu.ph" target="_blank">🌐 LU Student Portal</a></li>
-                        <li><a href="https://facebook.com/LagunaUniversityOfficial" target="_blank">📘 Official Facebook</a></li>
-                        <li><a href="mailto:info@lu.edu.ph">📧 Contact Webmail</a></li>
+                        <li><a href="https://portal.lu.edu.ph" target="_blank">🌐 &nbsp;LU Student Portal</a></li>
+                        <li><a href="https://facebook.com/LagunaUniversityOfficial" target="_blank">📘 &nbsp;Official Facebook</a></li>
+                        <li><a href="mailto:info@lu.edu.ph">📧 &nbsp;Contact Webmail</a></li>
                     </ul>
                 </div>
+
             </div>
 
             <div class="sidebar-footer">
-                <p>© 2024 Laguna University Navigator</p>
-                <small>v2.0.0 • Designed for LUnians</small>
+                <p style="margin:0 0 2px;">© 2024 Laguna University Navigator</p>
+                <span>v2.0.0</span>
             </div>
         </aside>
 
-        <!-- =============================================
-             MAIN CONTENT (Map + Overlays)
-             ============================================= -->
+        <!-- ==========================================
+             MAIN MAP VIEW
+             ========================================== -->
         <main class="main-content">
 
             <!-- THE MAP -->
             <div id="map"></div>
 
-            <!-- ROOM DETAIL CARD (slides up from bottom) -->
-            <div class="room-card" id="room-card">
-                <div class="card-image-section">
-                    <button class="close-card-btn" id="close-card" title="Dismiss">✕</button>
-                    <img id="card-img" src="assets/images/placeholder.jpg" alt="Room Photo">
-                </div>
-                <div class="card-details">
-                    <h2 id="card-title">Room Name</h2>
-                    <span id="card-tag" class="room-tag">Category</span>
-                    <p id="card-desc">Detailed information will appear here.</p>
-                    <div class="card-actions">
-                        <button class="nav-btn" id="card-nav-btn">
-                            <span>🚶</span> Get Directions
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- SEARCH (floating top bar) -->
+            <!-- SEARCH BAR (Google Maps floating top bar) -->
             <div class="floating-search-container">
                 <div class="search-card">
-                    <button class="burger-menu-btn" id="burger-btn" title="Open Menu">
+                    <button class="burger-menu-btn" id="burger-btn" title="Open Menu" aria-label="Open menu">
                         <span></span><span></span><span></span>
                     </button>
-                    <input type="text" id="map-search" placeholder="Search room, office, lab..." autocomplete="off" maxlength="200">
-                    <button class="search-btn" title="Search">🔍</button>
+                    <input
+                        type="text"
+                        id="map-search"
+                        placeholder="Search campus buildings, rooms…"
+                        autocomplete="off"
+                        maxlength="200"
+                        aria-label="Search campus"
+                    >
+                    <button class="search-btn" title="Search" aria-label="Search">
+                        <!-- Google-style search icon -->
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="#4285f4">
+                            <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                        </svg>
+                    </button>
                 </div>
                 <!-- Autocomplete dropdown injected here by JS -->
             </div>
 
-            <!-- FILTER PILLS (separate from search container) -->
+            <!-- FILTER CHIPS (below search bar) -->
             <div class="filter-row-wrapper">
                 <div class="filter-row">
                     <button class="f-pill active" data-filter="all"       onclick="filterMarkers('all', this)">All</button>
@@ -157,38 +132,73 @@
                 </div>
             </div>
 
-            <!-- MAP FABs (bottom right) -->
-            <div class="floating-actions">
-                <button class="map-fab" id="btn-locate" title="My Location">🎯</button>
-                <button class="map-fab" id="btn-reset" title="Reset View">🏠</button>
+            <!-- BOTTOM SHEET CARD (slides up when a marker is tapped) -->
+            <div class="room-card" id="room-card">
+                <div class="card-drag-handle"></div>
+                <div class="card-image-section">
+                    <button class="close-card-btn" id="close-card" onclick="closeCard()" title="Dismiss">✕</button>
+                    <img id="card-img" src="assets/images/placeholder.jpg" alt="Room Photo">
+                </div>
+                <div class="card-details">
+                    <div class="card-details-top">
+                        <h2 id="card-title">Room Name</h2>
+                        <div class="card-meta-row">
+                            <span id="card-tag" class="room-tag">Category</span>
+                        </div>
+                    </div>
+                    <div class="card-actions">
+                        <button class="nav-btn" id="card-nav-btn">
+                            <svg viewBox="0 0 24 24" width="20" height="20" fill="white">
+                                <path d="M21.71 11.29l-9-9a1 1 0 00-1.42 0l-9 9a1 1 0 000 1.42l9 9a1 1 0 001.42 0l9-9a1 1 0 000-1.42zM14 14.5V12h-4v3H8v-4a1 1 0 011-1h5V7.5l3.5 3.5-3.5 3.5z"/>
+                            </svg>
+                            Directions
+                        </button>
+                    </div>
+                </div>
             </div>
 
-            <!-- OLD DISTANCE TOAST — fallback (hidden when nav-panel is active) -->
+            <!-- FLOATING ACTION BUTTONS (Google-style square FABs) -->
+            <div class="floating-actions">
+                <button class="map-fab" id="btn-locate" title="My Location" aria-label="My location">
+                    <!-- Target icon -->
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="#1a73e8">
+                        <path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3c-.46-4.17-3.77-7.48-7.94-7.94V1h-2v2.06C6.83 3.52 3.52 6.83 3.06 11H1v2h2.06c.46 4.17 3.77 7.48 7.94 7.94V23h2v-2.06c4.17-.46 7.48-3.77 7.94-7.94H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/>
+                    </svg>
+                </button>
+                <button class="map-fab" id="btn-reset" title="Reset View" aria-label="Reset map view">
+                    <!-- Home icon -->
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="#5f6368">
+                        <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- OLD DISTANCE TOAST (fallback) -->
             <div id="distance-toast" class="toast hidden">
                 <div class="toast-body">
-                    <span id="target-name">Navigating to...</span>
+                    <span id="target-name">Navigating to…</span>
                     <div class="toast-distance"><span id="dist-value">0</span>m away</div>
                 </div>
             </div>
 
-            <!-- MAP LEGEND (bottom left) -->
+            <!-- MAP LEGEND (Google style) -->
             <div class="map-legend" id="map-legend">
                 <div class="legend-header" onclick="toggleLegend()">
-                    <span class="legend-title">📍 Legend</span>
+                    <span class="legend-title">Legend</span>
                     <span class="legend-toggle-icon" id="legend-icon">▾</span>
                 </div>
                 <div class="legend-body" id="legend-body">
-                    <div class="legend-item"><span class="legend-dot" style="background:#064e3b"></span> Office</div>
-                    <div class="legend-item"><span class="legend-dot" style="background:#1d4ed8"></span> Classroom</div>
+                    <div class="legend-item"><span class="legend-dot" style="background:#1a73e8"></span> Office</div>
+                    <div class="legend-item"><span class="legend-dot" style="background:#1558d6"></span> Classroom</div>
                     <div class="legend-item"><span class="legend-dot" style="background:#7c3aed"></span> Laboratory</div>
-                    <div class="legend-item"><span class="legend-dot" style="background:#b45309"></span> Gym / Sports</div>
-                    <div class="legend-item"><span class="legend-dot" style="background:#be185d"></span> Canteen</div>
+                    <div class="legend-item"><span class="legend-dot" style="background:#e8711a"></span> Gym / Sports</div>
+                    <div class="legend-item"><span class="legend-dot" style="background:#d61558"></span> Canteen</div>
                     <div class="legend-item"><span class="legend-dot" style="background:#0f766e"></span> Gate</div>
-                    <div class="legend-item"><span class="legend-dot" style="background:#78716c"></span> Landmark</div>
+                    <div class="legend-item"><span class="legend-dot" style="background:#5f6368"></span> Landmark</div>
                 </div>
             </div>
 
-            <!-- TURN-BY-TURN NAV PANEL injected by JS (public-map.js → injectNavPanel) -->
+            <!-- NAV PANEL injected by JS (injectNavPanel) -->
 
         </main>
     </div>
@@ -199,7 +209,7 @@
     <!-- Map logic -->
     <script type="module" src="js/pages/public-map.js"></script>
 
-    <!-- UI interaction (sidebar, card close) -->
+    <!-- UI interaction -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const burgerBtn    = document.getElementById('burger-btn');
@@ -207,19 +217,21 @@
             const sidebar      = document.getElementById('sidebar');
             const overlay      = document.getElementById('sidebar-overlay');
 
-            burgerBtn.addEventListener('click', () => {
+            function openSidebar() {
                 sidebar.classList.add('active');
                 overlay.classList.add('active');
-                renderSidebarLists(); // refresh on open
-            });
-
-            [closeSidebar, overlay].forEach(el => el.addEventListener('click', () => {
+                renderSidebarLists();
+            }
+            function closeSidebarFn() {
                 sidebar.classList.remove('active');
                 overlay.classList.remove('active');
-            }));
+            }
+
+            burgerBtn.addEventListener('click', openSidebar);
+            [closeSidebar, overlay].forEach(el => el.addEventListener('click', closeSidebarFn));
         });
 
-        // ── Legend toggle ──────────────────────────────────────
+        /* Legend toggle */
         function toggleLegend() {
             const body = document.getElementById('legend-body');
             const icon = document.getElementById('legend-icon');
@@ -227,7 +239,7 @@
             icon.textContent = open ? '▴' : '▾';
         }
 
-        // ── Sidebar: Recently Viewed + Favorites ───────────────
+        /* Sidebar lists */
         function renderSidebarLists() {
             // Recently Viewed
             try {
@@ -244,13 +256,13 @@
                 } else {
                     sec.style.display = 'none';
                 }
-            } catch {}
+            } catch(e) {}
 
             // Favorites
             try {
                 const favIds = JSON.parse(localStorage.getItem('lu-favorites') || '[]');
                 const favSec = document.getElementById('favs-section');
-                const favList= document.getElementById('favs-list');
+                const favList = document.getElementById('favs-list');
                 if (favIds.length > 0 && window._allBuildings) {
                     const favBuildings = window._allBuildings.filter(b => favIds.includes(b.id || b.name));
                     if (favBuildings.length > 0) {
@@ -262,18 +274,18 @@
                             </li>`).join('');
                     } else { favSec.style.display = 'none'; }
                 } else { favSec.style.display = 'none'; }
-            } catch {}
+            } catch(e) {}
         }
 
         function typeIcon(type) {
-            return { office:'🏢', lab:'🔬', classroom:'📚', gym:'🏋️', canteen:'🍴', gate:'🚪', landmark:'🗿' }[type] || '📍';
+            const icons = { office:'🏢', lab:'🔬', classroom:'📚', gym:'🏋️', canteen:'🍴', gate:'🚪', landmark:'🗿' };
+            return icons[type] || '📍';
         }
 
         function flyToRecent(lat, lng, name) {
             if (window._mapInstance) {
-                window._mapInstance.flyTo([lat, lng], 18, { animate: true, duration: 1.2 });
+                window._mapInstance.flyTo([lat, lng], 18, { animate: true, duration: 1 });
             }
-            // Close sidebar
             document.getElementById('sidebar').classList.remove('active');
             document.getElementById('sidebar-overlay').classList.remove('active');
         }
