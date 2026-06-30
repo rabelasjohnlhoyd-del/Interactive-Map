@@ -6,42 +6,56 @@
     "lat": 14.25564,
     "lng": 121.40778,
     "image": "assets/images/oreta.jpg",
-    "description": "The main administrative building of Laguna University, housing major department offices including the Office of the President and key administrative units.",
+    "description": "The main administrative building of Laguna University, housing the library, student organization offices, and various academic support services.",
     "hours": "8:00 AM - 5:00 PM",
-    "tags": ["admin", "office", "executive"],
+    "tags": ["admin", "office", "library"],
     "floors": [
       {
-        "id": "oreta-gf",
-        "name": "Ground Floor",
-        "colleges": "Administration & Finance",
-        "floorPhoto": "assets/images/floors/oreta-gf.jpg",
-        "orgChart": "assets/images/orgcharts/oreta-gf-org.jpg",
-        "faculty": {
-          "name": "Juan Dela Cruz",
-          "position": "Building Administrator",
-          "photo": "assets/images/faculty/oreta-admin.jpg"
-        },
+        "id": "oreta-1f",
+        "name": "1st Floor",
+        "colleges": "Library Services",
+        "floorPhoto": "assets/images/floors/oreta-1f.jpg",
+        "orgChart": null,
+        "faculty": null,
         "rooms": [
-          { "id": "oreta-gf-cashier", "name": "Cashier Office", "description": "Payment center for tuition and miscellaneous fees.", "isFaculty": false },
-          { "id": "oreta-gf-hrmo", "name": "HRMO Office", "description": "Human Resource Management Office for faculty and staff.", "isFaculty": false },
-          { "id": "oreta-gf-security", "name": "Security Office", "description": "Campus security administration and monitoring.", "isFaculty": false }
+          { "id": "oreta-library", "name": "Library", "description": "Main university library.", "isFaculty": false }
         ]
       },
       {
         "id": "oreta-2f",
-        "name": "Second Floor",
-        "colleges": "Executive Offices",
+        "name": "2nd Floor",
+        "colleges": "Student Organizations & Support Offices",
         "floorPhoto": "assets/images/floors/oreta-2f.jpg",
-        "orgChart": "assets/images/orgcharts/oreta-2f-org.jpg",
-        "faculty": {
-          "name": "Dr. Maria Santos",
-          "position": "University President",
-          "photo": "assets/images/faculty/president.jpg"
-        },
+        "orgChart": null,
+        "faculty": null,
         "rooms": [
-          { "id": "oreta-2f-president", "name": "Office of the President", "description": "Executive office of the University President.", "isFaculty": true },
-          { "id": "oreta-2f-vp", "name": "VP Academic Affairs", "description": "Office overseeing all academic programs and policies.", "isFaculty": true },
-          { "id": "oreta-2f-boardroom", "name": "Board Room", "description": "Main conference room for executive meetings.", "isFaculty": false }
+          { "id": "oreta-a201", "name": "A-201", "description": "Room.", "isFaculty": false },
+          { "id": "oreta-a202", "name": "A-202", "description": "Counseling Room.", "isFaculty": false },
+          { "id": "oreta-a203", "name": "A-203", "description": "Student Discipline Office.", "isFaculty": false },
+          { "id": "oreta-a204", "name": "A-204", "description": "Laguna University FRONTIER.", "isFaculty": false },
+          { "id": "oreta-a205", "name": "A-205", "description": "Room.", "isFaculty": false },
+          { "id": "oreta-a206", "name": "A-206", "description": "Laguna University Employees Credit Cooperative (LUECCO) Office.", "isFaculty": false },
+          { "id": "oreta-a207", "name": "A-207", "description": "Room.", "isFaculty": false },
+          { "id": "oreta-a208", "name": "A-208", "description": "Laguna University Performing Arts Club (LUPAC) Office.", "isFaculty": false },
+          { "id": "oreta-a209", "name": "A-209", "description": "Sports Development Office.", "isFaculty": false },
+          { "id": "oreta-a210", "name": "A-210", "description": "Laguna University Central Student Council.", "isFaculty": false },
+          { "id": "oreta-cl4", "name": "Computer Laboratory 4 (CL4)", "description": "Computer laboratory for student use.", "isFaculty": false },
+          { "id": "oreta-libext", "name": "Library Extension", "description": "Extension area of the main library.", "isFaculty": false }
+        ]
+      },
+      {
+        "id": "oreta-3f",
+        "name": "3rd Floor",
+        "colleges": "Storage & Student Support Offices",
+        "floorPhoto": "assets/images/floors/oreta-3f.jpg",
+        "orgChart": null,
+        "faculty": null,
+        "rooms": [
+          { "id": "oreta-a301", "name": "A-301", "description": "NSTP Office.", "isFaculty": false },
+          { "id": "oreta-a311", "name": "A-311", "description": "ASsIST.com Study Room.", "isFaculty": false },
+          { "id": "oreta-a316", "name": "A-316", "description": "Room.", "isFaculty": false },
+          { "id": "oreta-a320", "name": "A-320", "description": "Stock Room.", "isFaculty": false },
+          { "id": "oreta-a321", "name": "A-321", "description": "Storage Room.", "isFaculty": false }
         ]
       }
     ]
@@ -681,36 +695,75 @@
     "lat": 14.25490,
     "lng": 121.40754,
     "image": "assets/images/athlete.jpg",
-    "description": "Housing facility for Laguna University's student athletes. Provides dormitory-style accommodation for varsity players.",
-    "hours": "Resident Access Only",
-    "tags": ["dormitory", "athletes", "housing"],
+    "description": "Multi-purpose academic and residential building (AV) housing computer laboratories, athlete dormitories, and college offices for CBAA, CAS, and CCS.",
+    "hours": "8:00 AM - 5:00 PM",
+    "tags": ["AV", "comlab", "dormitory", "CBAA", "CAS", "CCS", "athletes"],
     "floors": [
       {
-        "id": "athlete-gf",
-        "name": "Ground Floor",
-        "colleges": "Athletics Department — Student Housing",
-        "floorPhoto": "assets/images/floors/athlete-gf.jpg",
-        "orgChart": null,
-        "faculty": {
-          "name": "Ms. Gloria Natividad",
-          "position": "Dormitory Manager",
-          "photo": "assets/images/faculty/dorm-manager.jpg"
-        },
-        "rooms": [
-          { "id": "athlete-lobby", "name": "Main Lobby", "description": "Reception and common area for residents.", "isFaculty": false },
-          { "id": "athlete-office", "name": "Dorm Manager's Office", "description": "Administration office for dormitory management.", "isFaculty": true }
-        ]
-      },
-      {
-        "id": "athlete-2f",
-        "name": "Second Floor — Dormitory Rooms",
-        "colleges": "Athletics Department — Student Housing",
-        "floorPhoto": "assets/images/floors/athlete-2f.jpg",
+        "id": "av-1f",
+        "name": "1st Floor",
+        "colleges": "Computer Laboratories",
+        "floorPhoto": "assets/images/floors/av-1f.jpg",
         "orgChart": null,
         "faculty": null,
         "rooms": [
-          { "id": "athlete-rm1", "name": "Male Dormitory Wing", "description": "Dormitory rooms for male student athletes.", "isFaculty": false },
-          { "id": "athlete-rm2", "name": "Female Dormitory Wing", "description": "Dormitory rooms for female student athletes.", "isFaculty": false }
+          { "id": "av-comlab1", "name": "Comlab 1", "description": "Computer laboratory for student use.", "isFaculty": false },
+          { "id": "av-comlab2", "name": "Comlab 2", "description": "Computer laboratory for student use.", "isFaculty": false },
+          { "id": "av-comlab3", "name": "Comlab 3", "description": "Computer laboratory for student use.", "isFaculty": false },
+          { "id": "av-1f-rm1", "name": "Available Room 1", "description": "General purpose room used by other students.", "isFaculty": false },
+          { "id": "av-1f-rm2", "name": "Available Room 2", "description": "General purpose room used by other students.", "isFaculty": false },
+          { "id": "av-avroom", "name": "Audio Visual Room", "description": "Room equipped with audio-visual facilities for presentations, seminars, and special class sessions.", "isFaculty": false }
+        ]
+      },
+      {
+        "id": "av-2f",
+        "name": "2nd Floor",
+        "colleges": "Student Athlete Dormitory",
+        "floorPhoto": "assets/images/floors/av-2f.jpg",
+        "orgChart": null,
+        "faculty": null,
+        "rooms": [
+          { "id": "av-2f-dorm", "name": "Athlete Dormitory", "description": "Sleeping quarters used by Laguna University's student athletes.", "isFaculty": false }
+        ]
+      },
+      {
+        "id": "av-3f",
+        "name": "3rd Floor",
+        "colleges": "College of Business, Administration and Accountancy (CBAA) & College of Arts and Sciences (CAS)",
+        "floorPhoto": "assets/images/floors/av-3f.jpg",
+        "orgChart": null,
+        "faculty": null,
+        "rooms": [
+          { "id": "av-301", "name": "AV 301", "description": "CBAA Faculty Room.", "isFaculty": true },
+          { "id": "av-302", "name": "AV 302", "description": "CAS Faculty Room.", "isFaculty": true },
+          { "id": "av-303", "name": "AV 303", "description": "Classroom.", "isFaculty": false },
+          { "id": "av-304", "name": "AV 304", "description": "Classroom.", "isFaculty": false },
+          { "id": "av-305", "name": "AV 305", "description": "Classroom.", "isFaculty": false },
+          { "id": "av-306", "name": "AV 306", "description": "Classroom.", "isFaculty": false },
+          { "id": "av-307", "name": "AV 307", "description": "Classroom.", "isFaculty": false },
+          { "id": "av-308", "name": "AV 308", "description": "Classroom.", "isFaculty": false },
+          { "id": "av-309", "name": "AV 309", "description": "Classroom.", "isFaculty": false },
+          { "id": "av-310", "name": "AV 310", "description": "Classroom.", "isFaculty": false }
+        ]
+      },
+      {
+        "id": "av-4f",
+        "name": "4th Floor",
+        "colleges": "College of Computing Studies (CCS)",
+        "floorPhoto": "assets/images/floors/av-4f.jpg",
+        "orgChart": null,
+        "faculty": null,
+        "rooms": [
+          { "id": "av-401", "name": "AV 401", "description": "CCS Faculty Room.", "isFaculty": true },
+          { "id": "av-402", "name": "AV 402", "description": "Classroom.", "isFaculty": false },
+          { "id": "av-403", "name": "AV 403", "description": "Classroom.", "isFaculty": false },
+          { "id": "av-404", "name": "AV 404", "description": "Classroom.", "isFaculty": false },
+          { "id": "av-405", "name": "AV 405", "description": "Classroom.", "isFaculty": false },
+          { "id": "av-406", "name": "AV 406", "description": "Classroom.", "isFaculty": false },
+          { "id": "av-407", "name": "AV 407", "description": "Classroom.", "isFaculty": false },
+          { "id": "av-408", "name": "AV 408", "description": "Classroom.", "isFaculty": false },
+          { "id": "av-409", "name": "AV 409", "description": "Classroom.", "isFaculty": false },
+          { "id": "av-410", "name": "AV 410", "description": "Classroom.", "isFaculty": false }
         ]
       }
     ]
