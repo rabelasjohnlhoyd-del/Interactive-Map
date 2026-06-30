@@ -44,10 +44,22 @@ const CAMPUS_GATES = [
     { name: 'Gate 2', lat: 14.25626, lng: 121.40779 },
 ];
 
+// User-selected entrance gate preference. 'auto' = let the app pick the
+// nearest/most sensible gate automatically. Otherwise, always force routes
+// through the named gate regardless of which gate is actually closer.
+let preferredGateName = localStorage.getItem('lu-pref-gate') || 'auto';
+function getPreferredGateObj() {
+    if (preferredGateName === 'auto') return null;
+    return CAMPUS_GATES.find(g => g.name === preferredGateName) || null;
+}
+
 // Pick the gate closer to the user as a routing waypoint, but only if the
 // destination is also reasonably close to that same gate (so we don't force
 // a detour for destinations clearly served by the other gate).
 function pickRoutingGate(userPos, destPos) {
+    // If the user manually selected an entrance gate, always force it.
+    const forced = getPreferredGateObj();
+    if (forced) return L.latLng(forced.lat, forced.lng);
     if (!CAMPUS_GATES.length) return null;
     let best = null, bestUserDist = Infinity;
     for (const g of CAMPUS_GATES) {
@@ -330,6 +342,7 @@ async function initMap() {
     window._mapInstance=map;
     loadVoice();
     injectNavPanel();
+    injectGateSelector();
     setupEventListeners();
     startLiveTracking();
     setTimeout(()=>applyTheme(isDarkMode),100);
@@ -486,6 +499,37 @@ function injectNavPanel() {
     });
 }
 
+// Floating pill control letting the user force navigation through a
+// specific campus entrance gate, or leave it on 'Auto' to let the app pick.
+function injectGateSelector() {
+    let wrap = document.getElementById('gate-selector');
+    const gates = ['auto', ...CAMPUS_GATES.map(g => g.name)];
+    const html = gates.map(name => {
+        const label = name === 'auto' ? '🧭 Auto' : `🚪 ${name}`;
+        const isActive = preferredGateName === name;
+        return `<button class="gate-pill" data-gate="${name}" style="border:none;background:${isActive ? '#1565c0' : 'transparent'};color:${isActive ? 'white' : 'var(--text-primary,#202124)'};padding:7px 14px;border-radius:50px;font-size:12.5px;font-weight:600;cursor:pointer;white-space:nowrap;">${label}</button>`;
+    }).join('');
+    if (!wrap) {
+        wrap = document.createElement('div');
+        wrap.id = 'gate-selector';
+        wrap.style.cssText = 'position:fixed;left:16px;bottom:16px;z-index:850;background:var(--card-bg,white);border-radius:50px;padding:5px;box-shadow:0 4px 16px rgba(0,0,0,0.25);display:flex;gap:4px;font-family:Roboto,Inter,sans-serif;';
+        document.body.appendChild(wrap);
+    }
+    wrap.innerHTML = html;
+    wrap.querySelectorAll('.gate-pill').forEach(btn => {
+        btn.addEventListener('click', () => setPreferredGate(btn.dataset.gate));
+    });
+}
+window.setPreferredGate = function(name) {
+    preferredGateName = name;
+    localStorage.setItem('lu-pref-gate', name);
+    injectGateSelector();
+    showToast(name === 'auto' ? '🧭 Auto-select entrance gate' : `🚪 Routing via ${name}`);
+    if (isNavigating && userMarker && destinationCoords) {
+        drawWalkingRoute(userMarker.getLatLng(), destinationCoords);
+    }
+};
+
 function showNavPanel(){document.getElementById('nav-panel')?.classList.remove('hidden');const t=document.getElementById('distance-toast');if(t){t.classList.add('hidden');t.style.display='none';}document.getElementById('room-card')?.classList.remove('active');}
 function hideNavPanel(){document.getElementById('nav-panel')?.classList.add('hidden');}
 
@@ -627,10 +671,19 @@ async function drawWalkingRoute(userPos,destPos) {
         // Start with whatever OSRM's default query returned (main + any native alternatives)
         let routesData = data.routes.map(r => ({ route: r, gateName: viaGate ? null : null }));
 
-        // ALWAYS also fetch a route forced through EVERY campus gate, so the
-        // user is offered a route-via-Gate-1 and a route-via-Gate-2 side by
-        // side whenever both are valid, distinct paths.
-        const gateRoutePromises = CAMPUS_GATES.map(g => fetchRouteViaGate(userPos, destPos, g));
+        // Only offer a route forced through a gate if that gate is actually
+        // plausible — i.e. it's reasonably close to the USER or reasonably
+        // close to the DESTINATION. This stops far-away/irrelevant gates
+        // (e.g. forcing a Gate 1 detour when both user and destination are
+        // next to Gate 2) from ever being considered as route options.
+        const GATE_RELEVANCE_M = 280; // how close to user/dest a gate must be to be considered
+        const relevantGates = CAMPUS_GATES.filter(g => {
+            const gLatLng = L.latLng(g.lat, g.lng);
+            const dUser = userPos.distanceTo(gLatLng);
+            const dDest = destPos.distanceTo(gLatLng);
+            return dUser <= GATE_RELEVANCE_M || dDest <= GATE_RELEVANCE_M;
+        });
+        const gateRoutePromises = relevantGates.map(g => fetchRouteViaGate(userPos, destPos, g));
         const gateResults = (await Promise.all(gateRoutePromises)).filter(Boolean);
 
         gateResults.forEach(({ route, gate }) => {
@@ -656,9 +709,17 @@ async function drawWalkingRoute(userPos,destPos) {
             route.legs.forEach(l => { if (l.steps) steps.push(...l.steps); });
             return { coords, steps, distance: Math.round(route.distance), duration: Math.round(route.duration), gateName, polyline: null, outline: null };
         });
-        // Use the shortest-distance route as the main (dark) route, regardless of source order
-        activeRouteIndex = allRouteOptions.reduce((bestIdx, opt, i, arr) =>
-            opt.distance < arr[bestIdx].distance ? i : bestIdx, 0);
+        // If the user manually picked an entrance gate, always use the route
+        // from the primary request (already forced through that gate) as the
+        // main route, instead of auto-picking by shortest distance.
+        const forcedGateForSelection = getPreferredGateObj();
+        if (forcedGateForSelection) {
+            activeRouteIndex = 0;
+        } else {
+            // Use the shortest-distance route as the main (dark) route, regardless of source order
+            activeRouteIndex = allRouteOptions.reduce((bestIdx, opt, i, arr) =>
+                opt.distance < arr[bestIdx].distance ? i : bestIdx, 0);
+        }
 
         const routeColor    = isDarkMode ? '#60a5fa' : '#1565c0';
         const outlineColor  = isDarkMode ? '#0a0f1a' : '#0b1f3a';
