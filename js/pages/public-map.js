@@ -37,6 +37,42 @@ const OSRM_TIMEOUT_MS  = 8000;
 const ROUTE_REFRESH_MS = 8000;
 const OSRM_BASE        = 'https://router.project-osrm.org/route/v1/foot';
 
+// Known campus gates — used to force routing through the correct entrance
+// when OSM road data doesn't reflect actual internal walkways.
+const CAMPUS_GATES = [
+    { name: 'Gate 1', lat: 14.25557, lng: 121.40067 },
+    { name: 'Gate 2', lat: 14.25626, lng: 121.40779 },
+];
+
+// Pick the gate closer to the user as a routing waypoint, but only if the
+// destination is also reasonably close to that same gate (so we don't force
+// a detour for destinations clearly served by the other gate).
+function pickRoutingGate(userPos, destPos) {
+    if (!CAMPUS_GATES.length) return null;
+    let best = null, bestUserDist = Infinity;
+    for (const g of CAMPUS_GATES) {
+        const gLatLng = L.latLng(g.lat, g.lng);
+        const dUser = userPos.distanceTo(gLatLng);
+        if (dUser < bestUserDist) { bestUserDist = dUser; best = { ...g, gLatLng, dUser }; }
+    }
+    if (!best) return null;
+    // Only force the waypoint if user is meaningfully close to a gate
+    // and the destination isn't already closer to a different gate.
+    let destNearestDist = Infinity;
+    for (const g of CAMPUS_GATES) {
+        const d = destPos.distanceTo(L.latLng(g.lat, g.lng));
+        if (d < destNearestDist) destNearestDist = d;
+    }
+    const destDistToBestGate = destPos.distanceTo(best.gLatLng);
+    // If user is within 80m of their nearest gate AND that gate isn't
+    // drastically farther from the destination than the destination's
+    // own nearest gate, use it as a via-point.
+    if (best.dUser <= 80 && destDistToBestGate <= destNearestDist + 250) {
+        return best.gLatLng;
+    }
+    return null;
+}
+
 // ── Walking speed constants (realistic campus pedestrian speeds) ──
 const WALK_SPEED_MPS   = 1.25;  // avg walking  ~4.5 km/h
 const RUN_SPEED_MPS    = 2.8;   // avg running  ~10 km/h
@@ -46,8 +82,19 @@ const CAR_SPEED_MPS    = 8.3;   // car on campus ~30 km/h
 // Remaining route tracking
 let remainingDistM     = 0;  // metres left along the actual path
 let totalRouteDistM    = 0;  // full route distance from OSRM
-let routeCoords        = [];  // full polyline coords [[lat,lng],...]
+let routeCoords        = [];  // full polyline coords of the ACTIVE/main route [[lat,lng],...]
 let navStartTime       = null;
+
+// Alternative routes support — main route is bright, others are dimmed.
+// When the user's position is closer to an alternate route than the
+// current main route, that alternate is promoted to main (brightened)
+// and the old main is dimmed in its place.
+let allRouteOptions    = [];  // [{ coords:[[lat,lng],...], steps:[...], distance, duration, polyline, outline }]
+let activeRouteIndex   = 0;
+const ALT_ROUTE_OPACITY     = 0.35;
+const ALT_ROUTE_OUTLINE_OP  = 0.25;
+const MAIN_ROUTE_OPACITY    = 1;
+const ROUTE_SWITCH_MARGIN_M = 12; // alt must be at least this much closer to switch (avoids flicker)
 
 // ── Tile config ───────────────────────────────────────────────
 // Light: full brightness, boosted saturation & contrast so
@@ -489,45 +536,160 @@ function stopNavigation(){
     isNavigating=false;destinationCoords=null;currentDestName='';currentSteps=[];currentStepIndex=0;
     routeCoords=[];totalRouteDistM=0;remainingDistM=0;navStartTime=null;
     clearTimeout(routeRefreshTimer);
-    if(routePolyline){map.removeLayer(routePolyline);routePolyline=null;}
-    if(routeOutline){map.removeLayer(routeOutline);routeOutline=null;}
+    clearRouteLayers();
+    activeRouteIndex=0;
     if(destMarker){map.removeLayer(destMarker);destMarker=null;}
     window.speechSynthesis?.cancel();
     hideNavPanel();
 }
 
+// Force a second OSRM route by inserting a midpoint detour waypoint offset
+// perpendicular to the direct line. Used only as a last-resort fallback when
+// neither campus gate could produce a usable second route.
+async function fetchForcedAlternative(userPos, destPos, viaGate) {
+    try {
+        const lat1 = userPos.lat, lng1 = userPos.lng;
+        const lat2 = destPos.lat, lng2 = destPos.lng;
+        const midLat = (lat1 + lat2) / 2;
+        const midLng = (lng1 + lng2) / 2;
+        // Perpendicular offset direction
+        const dLat = lat2 - lat1, dLng = lng2 - lng1;
+        const len = Math.sqrt(dLat*dLat + dLng*dLng) || 0.0001;
+        const offsetScale = 0.0009; // ~80-100m detour, tuned for campus scale
+        const perpLat = -(dLng / len) * offsetScale;
+        const perpLng =  (dLat / len) * offsetScale;
+        const detourLat = midLat + perpLat;
+        const detourLng = midLng + perpLng;
+
+        const waypoints = viaGate
+            ? `${lng1},${lat1};${detourLng},${detourLat};${viaGate.lng},${viaGate.lat};${lng2},${lat2}`
+            : `${lng1},${lat1};${detourLng},${detourLat};${lng2},${lat2}`;
+        const url = `${OSRM_BASE}/${waypoints}?overview=full&geometries=geojson&steps=true&annotations=false`;
+        const ctrl = new AbortController(), timer = setTimeout(() => ctrl.abort(), OSRM_TIMEOUT_MS);
+        const res = await fetch(url, { signal: ctrl.signal });
+        clearTimeout(timer);
+        const data = await res.json();
+        if (data.code === 'Ok' && data.routes?.length) return data.routes[0];
+    } catch (err) {
+        console.warn('Forced alternative route failed:', err.message);
+    }
+    return null;
+}
+
+// Fetch a route forced through a specific gate (used to always offer a
+// route-via-Gate-1 and a route-via-Gate-2 option side by side).
+async function fetchRouteViaGate(userPos, destPos, gate) {
+    try {
+        const waypoints = `${userPos.lng},${userPos.lat};${gate.lng},${gate.lat};${destPos.lng},${destPos.lat}`;
+        const url = `${OSRM_BASE}/${waypoints}?overview=full&geometries=geojson&steps=true&annotations=false`;
+        const ctrl = new AbortController(), timer = setTimeout(() => ctrl.abort(), OSRM_TIMEOUT_MS);
+        const res = await fetch(url, { signal: ctrl.signal });
+        clearTimeout(timer);
+        const data = await res.json();
+        if (data.code === 'Ok' && data.routes?.length) return { route: data.routes[0], gate };
+    } catch (err) {
+        console.warn(`Route via ${gate.name} failed:`, err.message);
+    }
+    return null;
+}
+
+// Returns true if two route coordinate arrays are essentially the same path
+// (used to avoid showing two visually-identical "alternatives").
+function routesAreNearDuplicate(coordsA, coordsB) {
+    if (!coordsA?.length || !coordsB?.length) return false;
+    const sampleIdx = [0, Math.floor(coordsA.length / 2), coordsA.length - 1];
+    let closeCount = 0;
+    for (const i of sampleIdx) {
+        const p = L.latLng(coordsA[i][0], coordsA[i][1]);
+        const d = nearestDistToRoute(p, coordsB);
+        if (d < 15) closeCount++;
+    }
+    return closeCount === sampleIdx.length;
+}
+
 async function drawWalkingRoute(userPos,destPos) {
     if (routeDrawPending) return;
     routeDrawPending=true;
-    const url=`${OSRM_BASE}/${userPos.lng},${userPos.lat};${destPos.lng},${destPos.lat}?overview=full&geometries=geojson&steps=true&annotations=false`;
+    const viaGate = pickRoutingGate(userPos, destPos);
+    const waypoints = viaGate
+        ? `${userPos.lng},${userPos.lat};${viaGate.lng},${viaGate.lat};${destPos.lng},${destPos.lat}`
+        : `${userPos.lng},${userPos.lat};${destPos.lng},${destPos.lat}`;
+    const url=`${OSRM_BASE}/${waypoints}?overview=full&geometries=geojson&steps=true&annotations=false&alternatives=true`;
     try {
         const ctrl=new AbortController(),timer=setTimeout(()=>ctrl.abort(),OSRM_TIMEOUT_MS);
         const res=await fetch(url,{signal:ctrl.signal});clearTimeout(timer);
         const data=await res.json();
         if (data.code!=='Ok'||!data.routes?.length) throw new Error('No route');
-        const route=data.routes[0];
-        const coords=route.geometry.coordinates.map(c=>[c[1],c[0]]);
-        routeCoords = coords;  // save for live remaining-distance calc
-        totalRouteDistM = Math.round(route.distance);
-        remainingDistM  = totalRouteDistM;
-        navStartTime    = Date.now();
-        const distM=totalRouteDistM, walkSecs=Math.round(route.duration);
-        currentSteps=[];route.legs.forEach(l=>{if(l.steps)currentSteps.push(...l.steps);});
-        if (routePolyline) map.removeLayer(routePolyline);
-        if (routeOutline)  map.removeLayer(routeOutline);
-        const routeColor   = isDarkMode ? '#60a5fa' : '#1565c0';
-        const outlineColor = isDarkMode ? '#0a0f1a' : '#0b1f3a';
-        routeOutline  = L.polyline(coords,{color:outlineColor,weight:12,opacity:1,lineJoin:'round',lineCap:'round'}).addTo(map);
-        routePolyline = L.polyline(coords,{color:routeColor,  weight:7, opacity:1,lineJoin:'round',lineCap:'round'}).addTo(map);
-        updateETADisplay(distM);
-        renderStepsList(currentSteps);
-        if (currentSteps[0]&&lastSpokenStep!==0){
-            lastSpokenStep=0;
-            document.getElementById('nav-turn-icon').innerHTML=getManeuverSVG(currentSteps[0]);
-            document.getElementById('nav-step-text').textContent=getManeuverText(currentSteps[0]);
-            document.getElementById('nav-step-dist').textContent=formatDist(currentSteps[0].distance);
-            speak(getManeuverText(currentSteps[0]));
+
+        // Clear any previous route layers
+        clearRouteLayers();
+
+        // Start with whatever OSRM's default query returned (main + any native alternatives)
+        let routesData = data.routes.map(r => ({ route: r, gateName: viaGate ? null : null }));
+
+        // ALWAYS also fetch a route forced through EVERY campus gate, so the
+        // user is offered a route-via-Gate-1 and a route-via-Gate-2 side by
+        // side whenever both are valid, distinct paths.
+        const gateRoutePromises = CAMPUS_GATES.map(g => fetchRouteViaGate(userPos, destPos, g));
+        const gateResults = (await Promise.all(gateRoutePromises)).filter(Boolean);
+
+        gateResults.forEach(({ route, gate }) => {
+            const coords = route.geometry.coordinates.map(c => [c[1], c[0]]);
+            // Skip if this gate route is basically identical to one we already have
+            const isDup = routesData.some(rd => {
+                const existingCoords = rd.route.geometry.coordinates.map(c => [c[1], c[0]]);
+                return routesAreNearDuplicate(coords, existingCoords);
+            });
+            if (!isDup) routesData.push({ route, gateName: gate.name });
+        });
+
+        // Last-resort: if we still only have one usable route (e.g. gate
+        // fetches failed or duplicated), force a detour-based alternative.
+        if (routesData.length < 2) {
+            const forcedAlt = await fetchForcedAlternative(userPos, destPos, viaGate);
+            if (forcedAlt) routesData.push({ route: forcedAlt, gateName: null });
         }
+
+        allRouteOptions = routesData.map(({ route, gateName }) => {
+            const coords = route.geometry.coordinates.map(c => [c[1], c[0]]);
+            const steps  = [];
+            route.legs.forEach(l => { if (l.steps) steps.push(...l.steps); });
+            return { coords, steps, distance: Math.round(route.distance), duration: Math.round(route.duration), gateName, polyline: null, outline: null };
+        });
+        // Use the shortest-distance route as the main (dark) route, regardless of source order
+        activeRouteIndex = allRouteOptions.reduce((bestIdx, opt, i, arr) =>
+            opt.distance < arr[bestIdx].distance ? i : bestIdx, 0);
+
+        const routeColor    = isDarkMode ? '#60a5fa' : '#1565c0';
+        const outlineColor  = isDarkMode ? '#0a0f1a' : '#0b1f3a';
+        const altColor       = isDarkMode ? '#3b5a78' : '#7a93ad';
+        const altOutlineColor= isDarkMode ? '#05080d' : '#1a2733';
+
+        // Draw every route; the active one bright, the rest dimmed/transparent.
+        allRouteOptions.forEach((opt, i) => {
+            const isMain = i === activeRouteIndex;
+            opt.outline = L.polyline(opt.coords, {
+                color: isMain ? outlineColor : altOutlineColor,
+                weight: isMain ? 12 : 9,
+                opacity: isMain ? 1 : ALT_ROUTE_OUTLINE_OP,
+                lineJoin: 'round', lineCap: 'round',
+            }).addTo(map);
+            opt.polyline = L.polyline(opt.coords, {
+                color: isMain ? routeColor : altColor,
+                weight: isMain ? 7 : 5,
+                opacity: isMain ? MAIN_ROUTE_OPACITY : ALT_ROUTE_OPACITY,
+                lineJoin: 'round', lineCap: 'round',
+                className: 'route-line' + (isMain ? ' route-line-main' : ' route-line-alt'),
+            }).addTo(map);
+            if (!isMain) {
+                // Clicking an alternative promotes it to the main route immediately
+                opt.polyline.on('click', () => promoteRoute(i, true));
+                opt.polyline.on('mouseover', () => opt.polyline.setStyle({ opacity: Math.min(1, ALT_ROUTE_OPACITY + 0.25) }));
+                opt.polyline.on('mouseout',  () => { if (i !== activeRouteIndex) opt.polyline.setStyle({ opacity: ALT_ROUTE_OPACITY }); });
+            }
+        });
+
+        applyActiveRouteState();
     } catch(err){
         if (err.name!=='AbortError') console.warn('OSRM error:',err.message);
         const d=Math.round(userPos.distanceTo(destPos));
@@ -537,6 +699,96 @@ async function drawWalkingRoute(userPos,destPos) {
     }
     routeDrawPending=false;
     if (isNavigating){clearTimeout(routeRefreshTimer);routeRefreshTimer=setTimeout(()=>{if(isNavigating&&userMarker&&destinationCoords)drawWalkingRoute(userMarker.getLatLng(),destinationCoords);},ROUTE_REFRESH_MS);}
+}
+
+// Remove all current route polylines/outlines from the map
+function clearRouteLayers(){
+    allRouteOptions.forEach(opt => {
+        if (opt.polyline) map.removeLayer(opt.polyline);
+        if (opt.outline)  map.removeLayer(opt.outline);
+    });
+    allRouteOptions = [];
+    if (routePolyline) { map.removeLayer(routePolyline); routePolyline = null; }
+    if (routeOutline)  { map.removeLayer(routeOutline);  routeOutline  = null; }
+}
+
+// Sync routeCoords/currentSteps/ETA/steps-list to whichever route is active
+function applyActiveRouteState(){
+    const active = allRouteOptions[activeRouteIndex];
+    if (!active) return;
+    routeCoords      = active.coords;
+    totalRouteDistM  = active.distance;
+    remainingDistM   = active.distance;
+    navStartTime     = Date.now();
+    currentSteps     = active.steps;
+    routePolyline    = active.polyline;
+    routeOutline     = active.outline;
+    updateETADisplay(active.distance);
+    renderStepsList(currentSteps);
+    if (currentSteps[0] && lastSpokenStep!==0){
+        lastSpokenStep=0;
+        document.getElementById('nav-turn-icon').innerHTML=getManeuverSVG(currentSteps[0]);
+        document.getElementById('nav-step-text').textContent=getManeuverText(currentSteps[0]);
+        document.getElementById('nav-step-dist').textContent=formatDist(currentSteps[0].distance);
+        speak(getManeuverText(currentSteps[0]));
+    }
+}
+
+// Visually swap which route is "main" (bright) vs "alternative" (dim)
+function promoteRoute(newIndex, announce){
+    if (newIndex===activeRouteIndex || !allRouteOptions[newIndex]) return;
+    const routeColor    = isDarkMode ? '#60a5fa' : '#1565c0';
+    const outlineColor  = isDarkMode ? '#0a0f1a' : '#0b1f3a';
+    const altColor       = isDarkMode ? '#3b5a78' : '#7a93ad';
+    const altOutlineColor= isDarkMode ? '#05080d' : '#1a2733';
+
+    // Dim the old main
+    const old = allRouteOptions[activeRouteIndex];
+    if (old) {
+        old.polyline.setStyle({ color: altColor, weight: 5, opacity: ALT_ROUTE_OPACITY, className: 'route-line route-line-alt' });
+        old.outline.setStyle({ color: altOutlineColor, weight: 9, opacity: ALT_ROUTE_OUTLINE_OP });
+        old.polyline.bringToBack();
+        old.outline.bringToBack();
+        old.polyline.off('click').on('click', () => promoteRoute(allRouteOptions.indexOf(old), true));
+    }
+
+    // Brighten the new main
+    const fresh = allRouteOptions[newIndex];
+    fresh.polyline.setStyle({ color: routeColor, weight: 7, opacity: MAIN_ROUTE_OPACITY, className: 'route-line route-line-main' });
+    fresh.outline.setStyle({ color: outlineColor, weight: 12, opacity: 1 });
+    fresh.polyline.off('click');
+    fresh.outline.bringToFront();
+    fresh.polyline.bringToFront();
+
+    activeRouteIndex = newIndex;
+    currentStepIndex = 0; lastSpokenStep = -1;
+    applyActiveRouteState();
+    if (announce) speak('Switching to this route');
+}
+
+// Find the shortest distance from userPos to any segment of a route's coords
+function nearestDistToRoute(userPos, coords){
+    if (!coords || !coords.length) return Infinity;
+    let min = Infinity;
+    for (let i=0;i<coords.length;i++){
+        const d = userPos.distanceTo(L.latLng(coords[i][0], coords[i][1]));
+        if (d < min) min = d;
+    }
+    return min;
+}
+
+// Called on every GPS update: if the user is now walking noticeably closer
+// to an alternative route than the current main route, promote it.
+function checkRoutePromotion(userPos){
+    if (allRouteOptions.length < 2) return;
+    const currentDist = nearestDistToRoute(userPos, allRouteOptions[activeRouteIndex]?.coords);
+    let bestIdx = activeRouteIndex, bestDist = currentDist;
+    allRouteOptions.forEach((opt, i) => {
+        if (i === activeRouteIndex) return;
+        const d = nearestDistToRoute(userPos, opt.coords);
+        if (d < bestDist - ROUTE_SWITCH_MARGIN_M) { bestDist = d; bestIdx = i; }
+    });
+    if (bestIdx !== activeRouteIndex) promoteRoute(bestIdx, true);
 }
 
 function drawFallbackLine(userPos,destPos){
@@ -571,6 +823,7 @@ function onGPSUpdate(pos){
     if (!accuracyCircle){accuracyCircle=L.circle(userPos,{radius:acc,color:dotColor,fillColor:dotColor,fillOpacity:0.06,weight:1}).addTo(map);}
     else{accuracyCircle.setLatLng(userPos);accuracyCircle.setRadius(acc);}
     if (!isNavigating||!destinationCoords) return;
+    checkRoutePromotion(userPos);
     const distLeft = calcRemainingDist(userPos);
     if (userPos.distanceTo(destinationCoords)<=ARRIVED_RADIUS_M){triggerArrival();return;}
     updateETADisplay(distLeft);

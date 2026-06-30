@@ -105,7 +105,7 @@
   },
   {
     "id": "chs-lab-lu07",
-    "name": "CHS Laboratory / LU 07",
+    "name": "Clinic/ LU 07",
     "type": "lab",
     "lat": 14.25619,
     "lng": 121.40553,
@@ -219,7 +219,7 @@
   },
   {
     "id": "registrar-lu13-14",
-    "name": "Registrar / LU 13-14",
+    "name": "faculty of Coed",
     "type": "office",
     "lat": 14.25658,
     "lng": 121.40549,
@@ -250,7 +250,7 @@
   },
   {
     "id": "clinic-lu16",
-    "name": "University Clinic / LU 16",
+    "name": "Faculty of P.E / LU 16",
     "type": "office",
     "lat": 14.25675,
     "lng": 121.40542,
@@ -280,7 +280,7 @@
   },
   {
     "id": "research-lu17",
-    "name": "Research Center / LU 17",
+    "name": "LU 17/ Deans office",
     "type": "office",
     "lat": 14.25686,
     "lng": 121.40537,
@@ -338,7 +338,7 @@
   },
   {
     "id": "cashier-lu19",
-    "name": "Cashier / LU 19",
+    "name": "LU 19",
     "type": "office",
     "lat": 14.25699,
     "lng": 121.40531,
@@ -368,7 +368,7 @@
   },
   {
     "id": "admin-lu20",
-    "name": "Admin Office / LU 20",
+    "name": " LU 20",
     "type": "office",
     "lat": 14.25705,
     "lng": 121.40529,
@@ -778,6 +778,54 @@
     "description": "A landmark monument dedicated to the national hero Dr. Jose Rizal, located at the center of the campus. A common meeting point and photo spot for students.",
     "hours": "Open Area",
     "tags": ["landmark", "monument", "open area"],
+    "floors": []
+  },
+  {
+    "id": "admin-office",
+    "name": "Admin",
+    "type": "office",
+    "lat": 14.254409267505036,
+    "lng": 121.40960112848772,
+    "image": "assets/images/admin.jpeg",
+    "description": "Administrative office building for the university.",
+    "hours": "8:00 AM - 5:00 PM",
+    "tags": ["admin", "office"],
+    "floors": []
+  },
+  {
+    "id": "new-court",
+    "name": "New Court",
+    "type": "gym",
+    "lat": 14.254649844328164,
+    "lng": 121.41012234464367,
+    "image": "assets/images/newc.jpeg",
+    "description": "Sports court used for basketball, volleyball, and other physical education activities.",
+    "hours": "Depends on Schedule",
+    "tags": ["gym", "sports", "court"],
+    "floors": []
+  },
+  {
+    "id": "oval",
+    "name": "Oval",
+    "type": "landmark",
+    "lat": 14.254866570742212,
+    "lng": 121.40515218748334,
+    "image": "assets/images/oval.jpeg",
+    "description": "Open oval field used for sports events, jogging, and university gatherings.",
+    "hours": "Open Area",
+    "tags": ["oval", "field", "open area"],
+    "floors": []
+  },
+  {
+    "id": "warehouse",
+    "name": "Warehouse",
+    "type": "office",
+    "lat": 14.255680128562583,
+    "lng": 121.40967814769108,
+    "image": "assets/images/warehouse.jpg",
+    "description": "University warehouse used for storage of supplies and equipment.",
+    "hours": "8:00 AM - 5:00 PM",
+    "tags": ["warehouse", "storage"],
     "floors": []
   }
 ]
