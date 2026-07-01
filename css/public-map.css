@@ -29,6 +29,8 @@ html, body {
   position: relative;
   height: 100vh;
   min-width: 0;
+  margin-left: 0;     /* overrides main.css admin offset — public map has no static sidebar */
+  padding-top: 0;     /* overrides main.css admin header offset */
 }
 
 /* ── Map ─────────────────────────────────────────── */

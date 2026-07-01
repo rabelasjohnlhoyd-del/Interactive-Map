@@ -1,0 +1,132 @@
+/* ============================================
+   LOGIN.CSS — Login Page (index.html only)
+   Uses design tokens from base.css
+   ============================================ */
+
+.login-page {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: linear-gradient(160deg, var(--lu-green-dark) 0%, var(--lu-green) 55%, var(--lu-green-mid) 100%);
+}
+
+.login-card {
+  width: 100%;
+  max-width: 400px;
+  background: var(--white);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: 32px 28px 28px;
+}
+
+/* ── Logo & School Name ───────────────────────── */
+.login-logo-area {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.login-logo-circle {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--lu-gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.login-logo-circle img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.login-logo-circle-text {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--lu-green-dark);
+}
+
+.login-school-name {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--gray-900);
+  line-height: 1.3;
+}
+
+.login-system-name {
+  font-size: 12px;
+  color: var(--gray-500);
+  margin-top: 2px;
+}
+
+.login-divider {
+  height: 1px;
+  background: var(--gray-200);
+  margin-bottom: 22px;
+}
+
+/* ── Form ──────────────────────────────────────── */
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.login-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: var(--danger-light);
+  border: 1px solid rgba(220,53,69,0.25);
+  border-radius: var(--border-radius);
+  color: var(--danger);
+  font-size: 13px;
+  font-weight: 500;
+}
+.login-error svg { flex-shrink: 0; }
+
+/* ── Submit Button ─────────────────────────────── */
+.btn-login {
+  width: 100%;
+  height: 46px;
+  margin-top: 6px;
+  background: var(--lu-green);
+  color: var(--white);
+  border: none;
+  border-radius: var(--border-radius);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  transition: background var(--transition), box-shadow var(--transition);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-login:hover {
+  background: var(--lu-green-dark);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-login:active {
+  background: var(--lu-green-dark);
+}
+
+.btn-login:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+/* ── Responsive ────────────────────────────────── */
+@media (max-width: 420px) {
+  .login-card { padding: 26px 20px 22px; }
+}
